@@ -1,0 +1,697 @@
+# Chapter 8
+
+*Pages: 132-151*
+
+---
+
+Chapter 8
+Measuring performance
+Previous chapters described neural network models, loss functions, and training algo-
+rithms. This chapter considers how to measure the performance of the trained models.
+Withsuﬀicientcapacity(i.e.,numberofhiddenunits),aneuralnetworkmodelwilloften
+perform perfectly on the training data. However, this does not necessarily mean it will
+generalize well to new test data.
+We will see that the test errors have three distinct causes and that their relative
+contributions depend on (i) the inherent uncertainty in the task, (ii) the amount of
+training data, and (iii) the choice of model. The latter dependency raises the issue of
+hyperparametersearch. Wediscusshowtoselectboththemodelhyperparameters(e.g.,
+the number of hidden layers and the number of hidden units in each) and the learning
+algorithm hyperparameters (e.g., the learning rate and batch size).
+8.1 Training a simple model
+We explore model performance using the MNIST-1D dataset (figure 8.1). This con-
+sists of ten classes y ∈ {0,1,...,9}, representing the digits 0–9. The data are derived
+from 1D templates for each of the digits. Each data example x is created by randomly
+transforming one of these templates and adding noise. The full training dataset {x ,y }
+i i
+consistsofI=4000trainingexamples,eachconsistingofD =40dimensionsrepresenting
+i
+the horizontal offset at 40 positions. The ten classes are drawn uniformly during data
+generation, so there are ∼400 examples of each class.
+WeuseanetworkwithD =40inputsandD =10outputswhicharepassedthrough
+i o
+a softmax function to produce class probabilities (see section 5.5). The network has two
+hidden layers with D=100 hidden units each. It is trained using stochastic gradient
+descent with batch size 100 and learning rate 0.1 for 6000 steps (150 epochs) with a
+multiclass cross-entropy loss (equation 5.24). Figure 8.2 shows that the training error
+decreases as training proceeds. The training data are classified perfectly after about
+Problem8.1 4000 steps. The training loss also decreases, eventually approaching zero.
+However,thisdoesn’timplythattheclassifierisperfect; themodelmighthavemem-
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.1 Training a simple model 119
+Figure8.1MNIST-1D.a)Templatesfor10classesy∈{0,...,9},basedondigits
+0–9. b) Training examples x are created by randomly transforming a template
+andc)addingnoise. d)Thehorizontaloffsetofthetransformedtemplateisthen
+sampled at 40 vertical positions. Adapted from (Greydanus, 2020)
+Figure 8.2MNIST-1Dresults. a)Percentclassificationerrorasafunctionofthe
+training step. The training set errors decrease to zero, but the test errors do not
+drop below ∼40%. This model doesn’t generalize well to new test data. b) Loss
+as a function of the training step. The training loss decreases steadily toward
+zero. The test loss decreases at first but subsequently increases as the model
+becomes increasingly confident about its (wrong) predictions.
+Draft: please send errata to udlbookmail@gmail.com.
+
+120 8 Measuring performance
+Figure 8.3 Regression function. Solid
+black line shows ground truth function.
+TogenerateI trainingexamples{x ,y },
+i i
+the input space x ∈ [0,1] is divided
+intoI equalsegmentsandonesamplex
+i
+is drawn from a uniform distribution
+within each segment. The correspond-
+ing value y is created by evaluating the
+i
+functionatx andaddingGaussiannoise
+i
+(gray region shows ±2 standard devia-
+tions). The test data are generated in
+the same way.
+orized the training set but be unable to predict new examples. To estimate the true
+performance, we need a separate test set of input/output pairs {x ,y }. To this end, we
+i i
+generate 1000 more examples using the same process. Figure 8.2a also shows the errors
+for this test data as a function of the training step. These decrease as training proceeds,
+but only to around 40%. This is better than the chance error rate of 90% but far worse
+than for the training set; the model has not generalized well to the test data.
+Thetestloss(figure8.2b)decreasesforthefirst1500trainingstepsbutthenincreases
+Notebook8.1
+again. At this point, the test error rate is fairly constant; the model makes the same
+MNIST-1D
+performance mistakes but with increasing confidence. This decreases the probability of the correct
+answers and thus increases the negative log-likelihood. This increasing confidence is a
+side-effectofthesoftmaxfunction;thepre-softmaxactivationsaredriventoincreasingly
+extremevaluestomaketheprobabilityofthetrainingdataapproachone(seefigure5.10).
+8.2 Sources of error
+Wenowconsiderthesourcesoftheerrorsthatoccurwhenamodelfailstogeneralize. To
+make this easier to visualize, we revert to a 1D least squares regression problem where
+we know exactly how the ground truth data were generated. Figure 8.3 shows a quasi-
+sinusoidal function; both training and test data are generated by sampling input values
+in the range [0,1], passing them through this function, and adding Gaussian noise with
+a fixed variance.
+Wefitasimplifiedshallowneuralnettothisdata(figure8.4). Theweightsandbiases
+that connect the input layer to the hidden layer are chosen so that the “joints” of the
+function are evenly spaced across the interval. If there are D hidden units, then these
+joints will be at 0,1/D,2/D,...,(D −1)/D. This model can represent any piecewise
+linear function with D equally sized regions in the range [0,1]. As well as being easy to
+understand, this model also has the advantage that it can be fit in closed form without
+theneedforstochasticoptimizationalgorithms(seeproblem8.3). Consequently, wecan
+Problems8.2–8.3
+guarantee to find the global minimum of the loss function during training.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.2 Sources of error 121
+Figure8.4Simplifiedneuralnetworkwiththreehiddenunits. a)Theweightsand
+biases between the input and hidden layer are fixed (dashed arrows). b–d) They
+arechosensothatthehiddenunitactivationshaveslopeone,andtheirjointsare
+equally spaced across the interval, with joints at x = 0, x = 1/3, and x = 2/3,
+respectively. Modifying the remaining parameters ϕ={β,ω ,ω ,ω } can create
+1 2 3
+any piecewise linear function over x ∈ [0,1] with joints at 1/3 and 2/3. e–g)
+Three example functions with different values of the parameters ϕ.
+Draft: please send errata to udlbookmail@gmail.com.
+
+122 8 Measuring performance
+Figure8.5Sourcesoftesterror. a)Noise. Datagenerationisnoisy,soevenifthe
+modelexactlyreplicatesthetrueunderlyingfunction(blackline),thenoiseinthe
+testdata(graypoints)meansthatsomeerrorwillremain(grayregionrepresents
+two standard deviations). b) Bias. Even with the best possible parameters, the
+three-region model (cyan line) cannot exactly fit the true function (black line).
+This bias is another source of error (gray regions represent signed error). c)
+Variance. Inpractice,wehavelimitednoisytrainingdata(orangepoints). When
+we fit the model, we don’t recover the best possible function from panel (b) but
+aslightlydifferentfunction(cyanline)thatreflectsidiosyncrasiesofthetraining
+data. This provides an additional source of error (gray region represents two
+standard deviations). Figure 8.6 shows how this region was calculated.
+8.2.1 Noise, bias, and variance
+There are three possible sources of error, which are known as noise, bias, and variance
+respectively (figure 8.5):
+Noise Thedatagenerationprocessincludestheadditionofnoise, sotherearemultiple
+possiblevalidoutputsyforeachinputx(figure8.5a). Thissourceoferrorisinsurmount-
+able for the test data. Note that it does not necessarily limit the training performance;
+we will likely never see the same input x twice during training, so it is still possible to
+fit the training data perfectly.
+Noise may arise because there is a genuine stochastic element to the data generation
+process,becausesomeofthedataaremislabeled,orbecausetherearefurtherexplanatory
+variables that were not observed. In rare cases, noise may be absent; for example,
+a network might approximate a function that is deterministic but requires significant
+computation to evaluate. However, noise is usually a fundamental limitation on the
+possible test performance.
+Bias A second potential source of error may occur because the model is not flexible
+enough to fit the true function perfectly. For example, the three-region neural network
+model cannot exactly describe the quasi-sinusoidal function, even when the parameters
+are chosen optimally (figure 8.5b). This is known as bias.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.2 Sources of error 123
+Variance We have limited training examples, and there is no way to distinguish sys-
+tematic changes in the underlying function from noise in the underlying data. When
+we fit a model, we do not get the closest possible approximation to the true underly-
+ing function. Indeed, for different training datasets, the result will be slightly different
+each time. This additional source of variability in the fitted function is termed variance
+(figure 8.5c). In practice, there might also be additional variance due to the stochastic
+learning algorithm, which does not necessarily converge to the same solution each time.
+8.2.2 Mathematical formulation of test error
+We now make the notions of noise, bias, and variance mathematically precise. Consider
+a 1D regression problem where the data generation process has additive noise with vari-
+ance σ2 (e.g., figure 8.3); we can observe different outputs y for the same input x, so for
+each x, there is a distribution Pr(y|x) with expected value (mean) µ[x]: AppendixC.2
+Expectation
+Z
+µ[x]=E [y[x]]= y[x]Pr(y|x)dy, (8.1)
+y
+(cid:2) (cid:3)
+and fixed noise σ2 =E (µ[x]−y[x])2 . Here we have used the notation y[x] to specify
+y
+that we are considering the output y at a given input position x.
+Now consider a least squares loss between the model prediction f[x,ϕ] at position x
+and the observed value y[x] at that position:
+(cid:0) (cid:1)
+L[x] = f[x,ϕ]−y[x] 2 (8.2)
+(cid:16)(cid:0) (cid:1) (cid:0) (cid:1)(cid:17)
+2
+= f[x,ϕ]−µ[x] + µ[x]−y[x]
+(cid:0) (cid:1) (cid:0) (cid:1)(cid:0) (cid:1) (cid:0) (cid:1)
+= f[x,ϕ]−µ[x] 2 +2 f[x,ϕ]−µ[x] µ[x]−y[x] + µ[x]−y[x] 2 ,
+where we have both added and subtracted the mean µ[x] of the underlying function in
+the second line and have expanded out the squared term in the third line.
+The underlying function is stochastic, so this loss depends on the particular y[x] we
+observe. The expected loss is:
+(cid:2) (cid:3) h(cid:0) (cid:1) (cid:0) (cid:1)(cid:0) (cid:1) (cid:0) (cid:1) i
+E L[x] = E f[x,ϕ]−µ[x] 2 +2 f[x,ϕ]−µ[x] µ[x]−y[x] + µ[x]−y[x] 2
+y y
+(cid:0) (cid:1) (cid:0) (cid:1)(cid:0) (cid:1) (cid:2) (cid:3)
+= f[x,ϕ]−µ[x] 2 +2 f[x,ϕ]−µ[x] µ[x]−E [y[x]] +E (µ[x]−y[x])2
+(cid:0) (cid:1) (cid:0) (cid:1)
+hy
+(cid:0) (cid:1)
+yi
+= f[x,ϕ]−µ[x] 2 +2 f[x,ϕ]−µ[x] ·0+E µ[x]−y[x] 2
+y
+(cid:0) (cid:1)
+= f[x,ϕ]−µ[x] 2 +σ2, (8.3)
+wherewehavemadeuseoftherulesformanipulatingexpectations. Inthesecondline,we
+AppendixC.2.1
+havedistributedtheexpectationoperatorandremoveditfromtermswithnodependence
+Expectationrules
+on y[x], and in the third line, we note that the second term is zero since E [y[x]]=µ[x]
+y
+by definition. Finally, in the fourth line, we have substituted in the definition of the
+Draft: please send errata to udlbookmail@gmail.com.
+
+124 8 Measuring performance
+noise σ2. We can see that the expected loss has been broken down into two terms; the
+first term is the squared deviation between the model and the true function mean, and
+the second term is the noise.
+Thefirsttermcanbefurtherpartitionedintobiasandvariance. Theparametersϕof
+themodelf[x,ϕ]dependonthetrainingdatasetD ={x ,y },somoreproperly,weshould
+i i
+write f[x,ϕ[D]]. The training dataset is a random sample from the data generation
+process; with a different sample of training data, we would learn different parameter
+values. Theexpectedmodeloutputf [x]withrespecttoallpossibledatasetsD ishence:
+µ
+h (cid:2) (cid:3)i
+f µ [x]=E D f x,ϕ[D] . (8.4)
+Returning to the first term of equation 8.3, we add and subtract f [x] and expand:
+µ
+(cid:0) (cid:1)
+f[x,ϕ[D]]−µ[x] 2 (8.5)
+(cid:16)(cid:0) (cid:1) (cid:0) (cid:1)(cid:17)
+2
+= f[x,ϕ[D]]−f [x] + f [x]−µ[x]
+µ µ
+(cid:0) (cid:1) (cid:0) (cid:1)(cid:0) (cid:1) (cid:0) (cid:1)
+= f[x,ϕ[D]]−f [x] 2 +2 f[x,ϕ[D]]−f [x] f [x]−µ[x] + f [x]−µ[x] 2 .
+µ µ µ µ
+We then take the expectation with respect to the training dataset D:
+h(cid:0) (cid:1) i h(cid:0) (cid:1) i (cid:0) (cid:1)
+E D f[x,ϕ[D]]−µ[x] 2 =E D f[x,ϕ[D]]−f µ [x] 2 + f µ [x]−µ[x] 2 , (8.6)
+where we have simplified using similar steps as for equation 8.3. Finally, we substitute
+this result into equation 8.3:
+h i h(cid:0) (cid:1) i (cid:0) (cid:1)
+E D E y [L[x]] =E D f[x,ϕ[D]]−f µ [x] 2 + f µ [x]−µ[x] 2 + σ2. (8.7)
+| {z } | {z } |{z}
+variance bias noise
+Thisequationsaysthattheexpectedlossafterconsideringtheuncertaintyinthetraining
+data D and the test data y consists of three additive components. The variance is
+uncertaintyinthefittedmodelduetotheparticulartrainingdatasetwesample. Thebias
+isthe systematic deviationof the modelfrom the meanof the functionweare modeling.
+The noise is the inherent uncertainty in the true mapping from input to output. These
+threesourcesoferrorwillbepresentforanytask. Theycombineadditivelyforregression
+taskswithaleastsquaresloss. However,theirinteractioncanbemorecomplexforother
+types of problems.
+8.3 Reducing error
+In the previous section, we saw that test error results from three sources: noise, bias,
+and variance. The noise component is insurmountable; there is nothing we can do to
+circumvent this, and it represents a fundamental limit on expected model performance.
+However, it is possible to reduce the other two terms.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.3 Reducing error 125
+8.3.1 Reducing variance
+Recall that the variance results from limited noisy training data. Fitting the model
+to two different training sets results in slightly different parameters. It follows we can
+reduce the variance by increasing the quantity of training data. This averages out the
+inherent noise and ensures that the input space is well sampled.
+Figure 8.6 shows the effect of training with 6, 10, and 100 samples. For each dataset
+size, we show the best-fitting model for three training datasets. With only six samples,
+thefittedfunctionisquitedifferenteachtime: thevarianceissignificant. Asweincrease
+thenumberofsamples, thefittedmodelsbecomeverysimilar, andthevariancereduces.
+In general, adding training data almost always improves test performance.
+8.3.2 Reducing bias
+The bias term results from the inability of the model to describe the true underlying
+function. Thissuggeststhatwecanreducethiserrorbymakingthemodelmoreflexible.
+This is usually done by increasing the model capacity. For neural networks, this means
+adding more hidden units and/or hidden layers.
+In the simplified model, adding capacity corresponds to adding more hidden units
+so that the interval [0,1] is divided into more linear regions. Figures 8.7a–c show that
+(unsurprisingly) this does indeed reduce the bias; as we increase the number of linear
+regions to ten, the model becomes flexible enough to fit the true function closely.
+8.3.3 Bias-variance trade-off
+However, figures 8.7d–f show an unexpected side-effect of increasing the model capacity.
+For a fixed-size training dataset, the variance term typically increases as the model
+capacity increases. Consequently, increasing the model capacity does not necessarily
+reduce the test error. This is known as the bias-variance trade-off.
+Figure8.8exploresthisphenomenon. Inpanelsa–c),wefitthesimplifiedthree-region
+model to three differentdatasets of fifteen points. Although the datasets differ, the final
+model is much the same; the noise in the dataset roughly averages out in each linear
+region. In panels d–f), we fit a model with ten regions to the same three datasets. This
+model has more flexibility, but this is disadvantageous; the model certainly fits the data
+better, and the training error will be lower, but much of the extra descriptive power is
+devoted to modeling the noise. This phenomenon is known as overfitting.
+We’veseenthatasweaddcapacitytothemodel,thebiasdecreases,butthevariance
+increasesforafixed-sizetrainingdataset. Thissuggeststhatthereisanoptimalcapacity
+wherethebiasisnottoolargeandthevarianceisstillrelativelysmall. Figure8.9shows
+how these terms vary numerically for the toy model as we increase the capacity, using
+Notebook8.2
+the data from figure 8.8. For regression models, the total expected error is the sum of
+Bias-variance
+the bias and the variance, and this sum is minimized when the model capacity is four trade-off
+(i.e., with four hidden units and four linear regions in the range of the data).
+Draft: please send errata to udlbookmail@gmail.com.
+
+126 8 Measuring performance
+Figure 8.6 Reducing variance by increasing training data. a–c) The three-region
+model fitted to three different randomly sampled datasets of six points. The
+fitted model is quite different each time. d) We repeat this experiment many
+times and plot the mean model predictions (cyan line) and the variance of the
+model predictions (gray area shows two standard deviations). e–h) We do the
+same experiment, but this time with datasets of size ten. The variance of the
+predictions is reduced. i–l) We repeat this experiment with datasets of size 100.
+Now the fitted model is always similar, and the variance is small.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.4 Double descent 127
+Figure 8.7 Bias and variance as a function of model capacity. a–c) As we in-
+creasethenumberofhiddenunitsofthetoymodel,thenumberoflinearregions
+increases, and the model becomes able to fit the true function closely; the bias
+(gray region) decreases. d–f) Unfortunately, increasing the model capacity has
+theside-effectofincreasingthevarianceterm(grayregion). Thisisknownasthe
+bias-variance trade-off.
+8.4 Double descent
+In the previous section, we examined the bias-variance trade-off as we increased the
+capacity of a model. Let’s now return to the MNIST-1D dataset and see whether this
+happensinpractice. Weuse10,000trainingexamples, testwithanother5,000examples
+and examine the training and test performance as we increase the capacity (number of
+parameters) in the model. We train the model with Adam and a step size of 0.005 using
+a full batch of 10,000 examples for 4000 steps.
+Figure 8.10a shows the training and test error for a neural network with two hid-
+den layers as the number of hidden units increases. The training error decreases as the
+capacity grows and quickly becomes close to zero. The vertical dashed line represents
+the capacity where the model has the same number of parameters as there are training
+examples, but the model memorizes the dataset before this point. The test error de-
+creasesasweaddmodelcapacitybutdoesnotincreaseaspredictedbythebias-variance
+trade-off curve; it keeps decreasing.
+In figure 8.10b, we repeat this experiment, but this time, we randomize 15% of the
+Draft: please send errata to udlbookmail@gmail.com.
+
+128 8 Measuring performance
+Figure 8.8 Overfitting. a–c) A model with three regions is fit to three different
+datasets of fifteen points each. The result is similar in all three cases (i.e., the
+variance is low). d–f) A model with ten regions is fit to the same datasets. The
+additionalflexibilitydoesnotnecessarilyproducebetterpredictions. Whilethese
+threemodelseachdescribethetrainingdatabetter,theyarenotnecessarilycloser
+to the true underlying function (black curve). Instead, they overfit the data and
+describe the noise, and the variance (difference between fitted curves) is larger.
+Figure 8.9 Bias-variance trade-off. The
+bias and variance terms from equa-
+tion 8.7 are plotted as a function of
+the model capacity (number of hidden
+units / linear regions in range of data)
+in the simplified model using training
+data from figure 8.8. As the capacity
+increases,thebias(solidorangeline)de-
+creases,butthevariance(solidcyanline)
+increases. The sum of these two terms
+(dashedgrayline)isminimizedwhenthe
+capacity is four.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.4 Double descent 129
+training labels. Once more, the training error decreases to zero. This time, there is
+more randomness, and the model requires almost as many parameters as there are data
+pointstomemorizethedata. Thetesterrordoesshowthetypicalbias-variancetrade-off
+as we increase the capacity to the point where the model fits the training data exactly.
+However, then it does something unexpected; it starts to decrease again. Indeed, if we
+add enough capacity, the test loss reduces to below the minimal level that we achieved
+in the first part of the curve.
+This phenomenon is known as double descent. For some datasets like MNIST, it is
+presentwiththeoriginaldata(figure8.10c). Forothers,likeMNIST-1DandCIFAR-100
+(figure 8.10d), it emerges or becomes more prominent when we add noise to the labels.
+Notebook8.3
+The first part of the curve is referred to as the classical or under-parameterized regime,
+Doubledescent
+andthesecondpartasthemodernorover-parameterizedregime. Thecentralpartwhere
+the error increases is termed the critical regime.
+8.4.1 Explanation
+Thediscoveryofdoubledescentisrecent,unexpected,andsomewhatpuzzling. Itresults
+fromaninteractionoftwophenomena. First, thetestperformancebecomestemporarily
+worse when the model has just enough capacity to memorize the data. Second, the test
+performancecontinuestoimprovewithcapacityevenwhenthisexceedsthepointwhere
+thetrainingdataareallclassifiedcorrectly. Thefirstphenomenonisexactlyaspredicted
+by the bias-variance trade-off. The second phenomenon is more confusing; it’s unclear
+whyperformanceshouldbebetterintheover-parameterizedregime,giventhatthereare
+now not even enough training data points to constrain the model parameters uniquely.
+To understand why performance continues to improve as we add more parameters,
+note that once the model has enough capacity to drive the training loss to near zero,
+the model fits the training data almost perfectly. This implies that further capacity
+Problems8.4–8.5
+cannot help the model fit the training data any better; any change must occur between
+the training points. The tendency of a model to prioritize one solution over another
+between data points is known as its inductive bias.
+The model’s behavior between data points is critical because, in high-dimensional
+space,thetrainingdataareextremelysparse. TheMNIST-1Ddatasethas40dimensions,
+and we trained with 10,000 examples. If this seems like plenty of data, consider what
+would happen if we quantized each input dimension into 10 bins. There would be 1040
+bins in total, constrained by only 104 examples. Even with this coarse quantization,
+there will only be one data point in every 1036 bins! The tendency of the volume of
+high-dimensional space to overwhelm the number of training points is termed the curse
+of dimensionality.
+Theimplicationisthatproblemsinhighdimensionsmightlookmorelikefigure8.11a;
+there are small regions of the input space where we observe data with significant gaps
+between them. The putative explanation for double descent is that as we add capacity
+to the model, it interpolates between the nearest data points increasingly smoothly. In
+the absence of information about what happens between the training points, assuming
+smoothness is sensible and will probably generalize reasonably to new data.
+Draft: please send errata to udlbookmail@gmail.com.
+
+130 8 Measuring performance
+Figure 8.10 Double descent. a) Training and test error on MNIST-1D for a
+two-hidden layer network as we increase the number of hidden units (and hence
+parameters) in each layer. The training error decreases to zero as the number of
+parameters approaches the number of training examples (vertical dashed line).
+The test error does not show the expected bias-variance trade-off but continues
+todecreaseevenafterthemodelhasmemorizedthedataset. b)Thesameexper-
+iment is repeated with noisier training data. Again, the training error reduces
+to zero, although it now takes almost as many parameters as training points to
+memorizethedataset. Thetesterrorshowsthepredictedbias/variancetrade-off;
+it decreases as the capacity increases but then increases again as we near the
+point where the training data is exactly memorized. However, it subsequently
+decreasesagainandultimatelyreachesabetterperformancelevel. Thisisknown
+as double descent. Depending on the loss function, the model, and the amount
+ofnoiseinthedata,thedoubledescentpatterncanbeseentoagreaterorlesser
+degree across many datasets. c) Results on MNIST (without label noise) with
+shallowneuralnetworkfromBelkinetal.(2019). d)ResultsonCIFAR-100with
+ResNet18 network (see chapter 11) from Nakkiran et al. (2021). See original
+papers for details.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.4 Double descent 131
+Figure 8.11Increasingcapacity(hiddenunits)allowssmootherinterpolationbe-
+tween sparse data points. a) Consider this situation where the training data
+(orange circles) are sparse; there is a large region in the center with no data ex-
+amplestoconstrainthemodeltomimicthetruefunction(blackcurve). b)Ifwe
+fitamodelwithjustenoughcapacitytofitthetrainingdata(cyancurve),thenit
+hastocontortitselftopassthroughthetrainingdata,andtheoutputpredictions
+will not be smooth. c–f) However, as we add more hidden units, the model has
+the ability to interpolate between the points more smoothly (smoothest possible
+curve plotted in each case). However, unlike in this figure, it is not obliged to.
+This argument is plausible. It’s certainly true that as we add more capacity to the
+model,itwillhavethecapabilitytocreatesmootherfunctions. Figures8.11b–fshowthe
+smoothest possible functions that still pass through the data points as we increase the
+number of hidden units. When the number of parameters is very close to the number
+of training data examples (figure 8.11b), the model is forced to contort itself to fit the
+training data exactly, resulting in erratic predictions. This explains why the peak in the
+doubledescentcurveissopronounced. Asweaddmorehiddenunits, themodelhasthe
+ability to construct smoother functions that are likely to generalize better to new data.
+However,thisdoesnotexplainwhyover-parameterizedmodelsshouldproducesmooth
+functions. Figure8.12showsthreefunctionsthatcanbecreatedbythesimplifiedmodel
+with 50 hidden units. In each case, the model fits the data exactly, so the loss is zero. If
+the modern regime of double descent is explained by increasing smoothness, then what
+exactly is encouraging this smoothness?
+Draft: please send errata to udlbookmail@gmail.com.
+
+132 8 Measuring performance
+Figure 8.12 Regularization. a–c) Each of the three fitted curves passes through
+the data points exactly, so the training loss for each is zero. However, we might
+expectthesmoothcurveinpanel(a)togeneralizemuchbettertonewdatathan
+the erratic curves in panels (b) and (c). Any factor that biases a model toward
+a subset of the solutions with a similar training loss is known as a regularizer.
+It is thought that the initialization and/or fitting of neural networks have an
+implicitregularizingeffect. Consequently,intheover-parameterizedregime,more
+reasonable solutions, such as that in panel (a), are encouraged.
+The answer to this question is uncertain, but there are two likely possibilities. First,
+thenetworkinitializationmayencouragesmoothness, andthemodelneverdepartsfrom
+the sub-domain of smooth function during the training process. Second, the training
+algorithm may somehow “prefer” to converge to smooth functions. Any factor that
+biasesasolutiontowardasubsetofequivalentsolutionsisknownasaregularizer,soone
+possibility is that the training algorithm acts as an implicit regularizer (see section 9.2).
+8.5 Choosing hyperparameters
+In the previous section, we discussed how test performance changes with model capac-
+ity. Unfortunately,intheclassicalregime, wedon’thaveaccesstoeitherthebias(which
+requiresknowledgeofthetrueunderlyingfunction)orthevariance(whichrequiresmul-
+tiple independently sampled datasets to estimate). In the modern regime, there is no
+way to tell how much capacity should be added before the test error stops improving.
+This raises the question of exactly how we should choose model capacity in practice.
+For a deep network, the model capacity depends on the numbers of hidden layers
+and hidden units per layer as well as other aspects of architecture that we have yet to
+introduce. Furthermore, the choiceof learning algorithm and anyassociated parameters
+(learning rate, etc.) also affects the test performance. These elements are collectively
+termed hyperparameters. The process of finding the best hyperparameters is termed
+hyperparametersearchor(whenfocusedonnetworkstructure)neuralarchitecturesearch.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+8.6 Summary 133
+Hyperparametersaretypicallychosenempirically; wetrainmanymodelswithdiffer-
+enthyperparametersonthesametrainingset,measuretheirperformance,andretainthe
+best model. However, we do not measure their performance on the test set; this would
+admit the possibility that these hyperparameters just happen to work well for the test
+set but don’t generalize to further data. Instead, we introduce a third dataset known
+as a validation set. For every choice of hyperparameters, we train the associated model
+using the training set and evaluate performance on the validation set. Finally, we select
+the model that worked best on the validation set and measure its performance on the
+test set. In principle, this should give a reasonable estimate of the true performance.
+The hyperparameter space is generally smaller than the parameter space but still
+too large to try every combination exhaustively. Unfortunately, many hyperparameters
+are discrete (e.g., the number of hidden layers), and others may be conditional on one
+another (e.g., we only need to specify the number of hidden units in the tenth hidden
+layeriftherearetenormorelayers). Hence,wecannotrelyongradientdescentmethods
+as we did for learning the model parameters. Hyperparameter optimization algorithms
+intelligently sample the space of hyperparameters, contingent on previous results. This
+procedureiscomputationallyexpensivesincewemusttrainanentiremodelandmeasure
+the validation performance for each combination of hyperparameters.
+8.6 Summary
+Tomeasureperformance,weuseaseparatetestset. Thedegreetowhichperformanceis
+maintained on this test set is known as generalization. Test errors can be explained by
+threefactors: noise,bias,andvariance. Thesecombineadditivelyinregressionproblems
+with least squares losses. Adding training data decreases the variance. When the model
+capacity is less than the number of training examples, increasing the capacity decreases
+bias but increases variance. This is known as the bias-variance trade-off, and there is a
+capacity where the trade-off is optimal.
+However, this is balanced against a tendency for performance to improve with ca-
+pacity, even when the parameters exceed the training examples. Together, these two
+phenomena create the double descent curve. It is thought that the model interpolates
+more smoothly between the training data points in the over-parameterized “modern
+regime,”althoughitisunclearwhatdrivesthis. Tochoosethecapacityandothermodel
+and training algorithm hyperparameters, we fit multiple models and evaluate their per-
+formance using a separate validation set.
+Notes
+Bias-variance trade-off: We showed that the test error for regression problems with least
+squares loss decomposes into the sum of noise, bias, and variance terms. These factors are
+all present for models with other losses, but their interaction is typically more complicated
+(Friedman,1997;Domingos,2000). Forclassificationproblems,therearesomecounter-intuitive
+Draft: please send errata to udlbookmail@gmail.com.
+
+134 8 Measuring performance
+predictions; for example, if the model is biased toward selecting the wrong class in a region of
+the input space, then increasing the variance can improve the classification rate as this pushes
+some of the predictions over the threshold to be classified correctly.
+Cross-validation: Wesawthatitistypicaltodividethedataintothreeparts: trainingdata
+(tolearnthemodelparameters),validationdata(tochoosethehyperparameters),andtestdata
+(toestimatethefinalperformance). However,thisdivisionmaycauseproblemswherethetotal
+number of data examples is limited; if the number of training examples is comparable to the
+model capacity, then the variance will be large.
+One way to mitigate this problem is to use k-fold cross-validation. The training and validation
+data are partitioned into K disjoint subsets. For example, we might divide these data into
+five parts. We train with four and validate with the fifth for each of the five permutations
+and choose the hyperparameters based on the average validation performance. The final test
+performanceisassessedusingtheaverageofthepredictionsfromthefivemodelswiththebest
+hyperparameters on an entirely different test set. There are many variations of this idea, but
+all share the general goal of using a larger proportion of the data to train the model, thereby
+reducing variance.
+Capacity: We have used the term capacity informally to mean the number of parameters or
+hidden units in the model (and hence indirectly, the ability of the model to fit functions of
+increasingcomplexity). Therepresentationalcapacityofamodeldescribesthespaceofpossible
+functions it can construct when we consider all possible parameter values. When we take into
+accountthefactthatanoptimizationalgorithmmaynotbeabletoreachallofthesesolutions,
+what is left is the effective capacity.
+The Vapnik-Chervonenkis (VC) dimension (Vapnik & Chervonenkis, 1971) is a more formal
+measure of capacity. It is the largest number of training examples that a binary classifier can
+label arbitrarily. Bartlett et al. (2019) derive upper and lower bounds for the VC dimension in
+termsofthenumberoflayersandweights. AnalternativemeasureofcapacityistheRademacher
+complexity,whichistheexpectedempiricalperformanceofaclassificationmodel(withoptimal
+parameters) for data with random labels. Neyshabur et al. (2017) derive a lower bound on the
+generalization error in terms of the Rademacher complexity.
+Double descent: Theterm“doubledescent”wascoinedbyBelkinetal.(2019),whodemon-
+stratedthatthetesterrordecreasesagainintheover-parameterizedregimefortwo-layerneural
+networks and random features. They also claimed that this occurs in decision trees, although
+Buschjäger & Morik (2021) subsequently provided evidence to the contrary. Nakkiran et al.
+(2021) show that double descent occurs for various modern datasets (CIFAR-10, CIFAR-100,
+IWSLT’14de-en),architectures(CNNs,ResNets,transformers),andoptimizers(SGD,Adam).
+Thephenomenonismorepronouncedwhennoiseisaddedtothetargetlabels(Nakkiranetal.,
+2021) and when some regularization techniques are used (Ishida et al., 2020).
+Nakkiranetal.(2021)alsoprovideempiricalevidencethattestperformancedependsoneffective
+modelcapacity(thelargestnumberofsamplesforwhichagivenmodelandtrainingmethodcan
+achievezerotrainingerror). Atthispoint,themodelstartstodevoteitseffortstointerpolating
+smoothly. Assuch,thetestperformancedependsnotjustonthemodelbutalsoonthetraining
+algorithmandlengthoftraining. Theyobservethesamepatternwhentheystudyamodelwith
+fixedcapacityandincreasethenumberoftrainingiterations. Theytermthisepoch-wisedouble
+descent. This phenomenon has been modeled by Pezeshki et al. (2022) in terms of different
+features in the model being learned at different speeds.
+Double descent makes the rather strange prediction that adding training data can sometimes
+worsentestperformance. Consideranover-parameterizedmodelintheseconddescendingpart
+of the curve. If we increase the training data to match the model capacity, we will now be in
+the critical region of the new test error curve, and the test loss may increase.
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+Notes 135
+Bubeck&Sellke(2021)provethatoverparameterizationisnecessarytointerpolatedatasmoothly
+in high dimensions. They demonstrate a trade-off between the number of parameters and the
+AppendixB.1.1
+Lipschitz constant of a model (the fastest the output can change for a small input change). A
+Lipschitzconstant
+review of the theory of over-parameterized machine learning can be found in Dar et al. (2021).
+Curseofdimensionality: Asdimensionalityincreases,thevolumeofspacegrowssofastthat
+the amount of data needed to densely sample it increases exponentially. This phenomenon is
+knownasthecurseofdimensionality. High-dimensionalspacehasmanyunexpectedproperties,
+and caution should be used when trying to reason about it based on low-dimensional exam-
+ples. This book visualizes many aspects of deep learning in one or two dimensions, but these
+visualizations should be treated with healthy skepticism.
+Surprisingpropertiesofhigh-dimensionalspacesinclude: (i)Tworandomlysampleddatapoints
+from a standard normal distribution are very close to orthogonal to one another (relative to
+Problems8.6–8.9
+the origin) with high likelihood. (ii) The distance from the origin of samples from a standard
+normal distribution is roughly constant. (iii) Most of a volume of a high-dimensional sphere
+(hypersphere)isadjacenttoitssurface(acommonmetaphoristhatmostofthevolumeofahigh-
+dimensionalorangeisinthepeel,notinthepulp). (iv)Ifweplaceaunit-diameterhypersphere
+insideahypercubewithunit-lengthsides,thenthehyperspheretakesupadecreasingproportion
+of the volume of the cube as the dimension increases. Since the volume of the cube is fixed at
+Notebook8.4
+sizeone,thisimpliesthatthevolumeofahigh-dimensionalhyperspherebecomesclosetozero.
+High-dimensional
+(v)Forrandompointsdrawnfromauniformdistributioninahigh-dimensionalhypercube,the
+spaces
+ratio of the Euclidean distance between the nearest and furthest points becomes close to one.
+For further information, consult Beyer et al. (1999) and Aggarwal et al. (2001).
+Real-worldperformance: Inthischapter,wearguedthatmodelperformancecouldbeevalu-
+atedusingaheld-outtestset. However,theresultwon’tbeindicativeofreal-worldperformance
+if the statistics of the test set don’t match those of real-world data. Moreover, the statistics
+of real-world data may change over time, causing the model to become increasingly stale and
+performancetodecrease. Thisisknownasdata driftandmeansthatdeployedmodelsmustbe
+carefully monitored.
+There are three main reasons why real-world performance may be worse than the test perfor-
+mance implies. First, the statistics of the input data x may change; we may now be observing
+parts of the function that were sparsely sampled or not sampled at all during training. This
+is known as covariate shift. Second, the statistics of the output data y may change; if some
+output values are infrequent during training, then the model may learn not to predict these in
+ambiguous situations and will make mistakes if they are more common in the real world. This
+is known as prior shift. Third, the relationship between input and output may change. This is
+known as concept shift. These issues are discussed in Moreno-Torres et al. (2012).
+Hyperparameter search: Finding the best hyperparameters is a challenging optimization
+task. Testing a single configuration of hyperparameters is expensive; we must train an entire
+model and measure its performance. We have no easy way to access the derivatives (i.e., how
+performance changes when we make a small change to a hyperparameter). Moreover, many of
+thehyperparametersarediscrete,sowecannotusegradientdescentmethods. Therearemultiple
+local minima and no way to tell if we are close to the global minimum. The noise level is high
+since each training/validation cycle uses a stochastic training algorithm; we expect different
+results if we train a model twice with the same hyperparameters. Finally, some variables are
+conditional and only exist if others are set. For example, the number of hidden units in the
+third hidden layer is only relevant if we have at least three hidden layers.
+A simple approach is to sample the space randomly (Bergstra & Bengio, 2012). However,
+for continuous variables, it is better to build a model of performance as a function of the
+hyperparameters and the uncertainty in this function. This can be exploited to test where the
+uncertaintyisgreat(explorethespace)orhomeinonregionswhereperformancelookspromising
+Draft: please send errata to udlbookmail@gmail.com.
+
+136 8 Measuring performance
+(exploitpreviousknowledge). BayesianoptimizationisaframeworkbasedonGaussianprocesses
+that does just this, and its application to hyperparameter search is described in Snoek et al.
+(2012). The Beta-Bernoulli bandit (see Lattimore & Szepesvári, 2020) is a roughly equivalent
+model for describing uncertainty in results due to discrete variables.
+Thesequentialmodel-basedconfiguration(SMAC)algorithm(Hutteretal.,2011)cancopewith
+continuous,discrete,andconditionalparameters. Thebasicapproachistousearandomforest
+to model the objective function where the mean of the tree predictions is the best guess about
+the objective function, and their variance represents the uncertainty. A completely different
+approachthatcanalsocopewithcombinationsofcontinuous,discrete,andconditionalparam-
+eters is Tree-Parzen Estimators (Bergstra et al., 2011). The previous methods modeled the
+probability of the model performance given the hyperparameters. In contrast, the Tree-Parzen
+estimator models the probability of the hyperparameters given the model performance.
+Hyperband(Lietal.,2017b)isamulti-armedbanditstrategyforhyperparameteroptimization.
+Itassumesthattherearecomputationallycheapbutapproximatewaystomeasureperformance
+(e.g., by not training to completion) and that these can be associated with a budget (e.g., by
+trainingforafixednumberofiterations). Anumberofrandomconfigurationsaresampledand
+run until the budget is used up. Then the best fraction η of runs is kept, and the budget is
+multiplied by 1/η. This is repeated until the maximum budget is reached. This approach has
+theadvantageofeﬀiciency;forbadconfigurations,itdoesnotneedtoruntheexperimenttothe
+end. However, each sample is just chosen randomly, which is ineﬀicient. The BOHB algorithm
+(Falkner et al., 2018) combines the eﬀiciency of Hyperband with the more sensible choice of
+hyperparameters from Tree Parzen estimators to construct an even better method.
+Problems
+Problem8.1Willthemulticlasscross-entropytraininglossinfigure8.2everreachzero? Explain
+your reasoning.
+Problem 8.2 Whatvaluesshouldwechooseforthethreeweightsandbiasesinthefirstlayerof
+the model in figure 8.4a so that the hidden unit’s responses are as depicted in figures 8.4b–d?
+Problem 8.3∗ Given a training dataset consisting of I input/output pairs {x ,y }, show how
+i i
+the parameters {β,ω ,ω ,ω } for the model in figure 8.4a using the least squares loss function
+1 2 3
+can be found in closed form.
+Problem 8.4 Consider the curve in figure 8.10b at the point where we train a model with a
+hiddenlayerofsize200,whichwouldhave50,410parameters. Whatdoyoupredictwillhappen
+tothetrainingandtestperformanceifweincreasethenumberoftrainingexamplesfrom10,000
+to 50,410?
+Problem 8.5 Consider the case where the model capacity exceeds the number of training data
+points, and the model is flexible enough to reduce the training loss to zero. What are the
+implications of this for fitting a heteroscedastic model? Propose a method to resolve any
+problems that you identify.
+Problem 8.6 Show that two random points drawn from a 1000-dimensional standard Gaussian
+distribution are orthogonal relative to the origin with high probability.
+Problem 8.7 The volume of a hypersphere with radius r in D dimensions is:
+This work is subject to a Creative Commons CC-BY-NC-ND license. (C) MIT Press.
+
+Notes 137
+Figure 8.13 Typical sets. a) Standard normal distribution in two dimensions.
+Circles are four samples from this distribution. As the distance from the cen-
+ter increases, the probability decreases, but the volume of space at that radius
+(i.e., the area between adjacent evenly spaced circles) increases. b) These fac-
+tors trade off so that the histogram of distances of samples from the center has
+a pronounced peak. c) In higher dimensions, this effect becomes more extreme,
+andtheprobabilityofobservingasampleclosetothemeanbecomesvanishingly
+small. Although the most likely point is at the mean of the distribution, the
+typical samples are found in a relatively narrow shell.
+rDπD/2
+Vol[r]= , (8.8)
+Γ[D/2+1]
+AppendixB.1.3
+where Γ[•] is the Gamma function. Show using Stirling’s formula that the volume of a hyper- Gammafunction
+sphere of diameter one (radius r=0.5) becomes zero as the dimension increases.
+AppendixB.1.4
+Problem 8.8∗ Consider a hypersphere of radius r = 1. Find an expression for the proportion Stirling’sformula
+of the total volume that lies in the outermost 1% of the distance from the center (i.e., in the
+outermost shell of thickness 0.01). Show that this becomes one as the dimension increases.
+Problem 8.9 Figure 8.13c shows the distribution of distances of samples of a standard normal
+distribution as the dimension increases. Empirically verify this finding by sampling from the
+standard normal distributions in 25, 100, and 500 dimensions and plotting a histogram of the
+distancesfromthecenter. Whatclosed-formprobabilitydistributiondescribesthesedistances?
+Draft: please send errata to udlbookmail@gmail.com.

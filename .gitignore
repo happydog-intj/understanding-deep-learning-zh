@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+translation_progress.log
+full_translation.log
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# PDF files (optional - 根据需要决定是否上传原始PDF)
+*.pdf
+
+# Private/Test files
+test_*.py
+private/
+temp/
+
+# Output from tools
+/private/
