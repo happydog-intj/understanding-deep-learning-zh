@@ -1,0 +1,27 @@
+{
+  "name": "understanding-deep-learning-zh",
+  "version": "1.0.0",
+  "description": "> Understanding Deep Learning 中文翻译项目",
+  "main": "index.js",
+  "scripts": {
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/happydog-intj/understanding-deep-learning-zh.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/happydog-intj/understanding-deep-learning-zh/issues"
+  },
+  "homepage": "https://github.com/happydog-intj/understanding-deep-learning-zh#readme",
+  "devDependencies": {
+    "markdown-it-mathjax3": "^4.3.2",
+    "vitepress": "^1.6.4"
+  }
+}

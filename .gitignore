@@ -36,6 +36,14 @@ wheels/
 translation_progress.log
 full_translation.log
 
+# Node.js
+node_modules/
+package-lock.json
+
+# VitePress
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
 # Temporary files
 *.tmp
 *.bak
