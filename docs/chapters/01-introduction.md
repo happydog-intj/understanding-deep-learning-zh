@@ -8,6 +8,12 @@
 
 机器学习方法大致可分为三大类：监督学习、无监督学习和强化学习。在本书撰写之际，这三个领域的前沿技术均依赖深度学习（图 1.1）。本章作为导论，将从宏观层面介绍这三类方法，这一分类也大致体现在本书的整体结构中。无论我们是否愿意，深度学习正蓄势改变我们的世界，而这一变革并非全然积极。因此，本章还包含人工智能伦理的简要入门，并以如何高效使用本书的建议作结。
 
+<div align="center">
+
+![图 1.1](/figures/ch01/fig-1.1.png)
+
+</div>
+
 > **图 1.1** 机器学习是人工智能的一个分支，通过将数学模型拟合到观测数据来做出决策。它大致可分为监督学习、无监督学习和强化学习三类。深度神经网络在这三个领域中均发挥着重要作用。
 
 ## 1.1 监督学习
@@ -21,6 +27,12 @@
 图 1.2a 中的模型根据房屋特征（如面积、卧室数量等）预测其售价。这是一个*回归*（regression）问题，因为模型输出的是一个连续数值（而非类别标签）。相比之下，图 1.2b 中的模型以分子的化学结构为输入，预测其凝固点与沸点。由于需同时预测多个数值，这属于*多元回归*（multivariate regression）问题。
 
 图 1.2c 中的模型以一段餐厅评论文本为输入，预测该评论的情感倾向为正面或负面。这是一个*二分类*（binary classification）问题，因为模型需将输入划分至两个互斥类别之一。输出向量包含输入属于各类别的概率。图 1.2d 和 1.2e 则展示了*多分类*（multiclass classification）问题，模型需将输入划分至 $N > 2$ 个类别中的某一个。在第一种情形下，输入是一段音频，模型判断其所属的音乐流派；在第二种情形下，输入是一幅图像，模型识别其中的物体类别。在这两种情形中，模型均输出一个长度为 $N$ 的向量，各分量分别表示输入属于对应类别的概率。
+
+<div align="center">
+
+![图 1.2](/figures/ch01/fig-1.2.png)
+
+</div>
 
 > **图 1.2** 回归与分类问题。a) 该回归模型接收表征房屋属性的数值向量，预测其价格。b) 该多元回归模型接收化学分子结构，预测其凝固点与沸点。c) 该二分类模型接收一条餐厅评论，将其分类为正面或负面。d) 该多分类问题将一段音频片段划分至 $N$ 个可能的音乐流派之一。e) 另一个多分类问题中，模型根据图像中可能包含的 $N$ 种物体之一对其进行分类。
 
@@ -37,6 +49,12 @@
 ### 1.1.3 机器学习模型
 
 到目前为止，我们一直将机器学习模型视为一个接收输入向量并返回输出向量的黑箱。那么这个黑箱里面究竟是什么？考虑一个根据儿童年龄预测身高的模型（图 1.3）。机器学习模型是一个数学方程，描述了平均身高如何随年龄变化（图 1.3 中的青色曲线）。当我们将年龄输入该方程，它便返回对应的身高。例如，如果年龄为10岁，则预测身高为 139 厘米。
+
+<div align="center">
+
+![图 1.3](/figures/ch01/fig-1.3.png)
+
+</div>
 
 > **图 1.3** 机器学习模型。模型代表一族将输入（儿童年龄）与输出（儿童身高）关联起来的关系。具体采用哪一种关系由训练数据决定；训练数据由若干输入/输出对（橙色点）构成。训练过程中，我们遍历所有可能的关系，从中选出一个能较好拟合数据的。此处，训练完成的模型即为青色曲线，可用于计算任意年龄对应的身高。
 
@@ -60,6 +78,12 @@
 
 幸运的是，这种"语法"可以在不需要输出标签的情况下学习。例如，我们可以通过学习大规模文本语料库的统计特性来掌握如何生成合法的英语句子。这就引出了本书下一节要讨论的内容——*无监督学习模型*。
 
+<div align="center">
+
+![图 1.4](/figures/ch01/fig-1.4.png)
+
+</div>
+
 > **图 1.4** 结构化输出。a) 语义分割模型为输入图像的每个像素分配一个二值标签（牛或背景）。b) 该模型为街景图像的每个像素预测一个深度值。c) 语音识别模型接收一段音频波形，输出其文字转录。d) 该模型将英文文本翻译为法文。e) 该模型根据文字描述生成匹配的图像。
 
 ## 1.2 无监督学习
@@ -72,11 +96,37 @@
 
 最先进的生成模型能够合成极其逼真、但又不同于训练样本的新数据。它们在图像生成（图 1.5）和文本生成（图 1.6）方面尤为成功。它们还能在部分输出被预先确定的约束下合成数据（称为*条件生成*，conditional generation）。示例包括图像修复（image inpainting，图 1.7）和文本续写（text completion，图 1.8）。事实上，现代文本生成模型非常强大，以至于它们看起来具有智能。给定一段文本后面跟一个问题，模型通常能够通过生成最可能的文档续写来"填入"缺失的答案。然而，实际上模型只是了解了语言的统计规律，并不真正理解其答案的含义。
 
+<div align="center">
+
+![图 1.5](/figures/ch01/fig-1.5.png)
+
+</div>
+
 > **图 1.5** 图像生成模型。左侧：由在猫的图片上训练的模型生成的两张图像。这些不是真正的猫，而是从概率模型中采样的结果。右侧：由在建筑物图片上训练的模型生成的两张图像。改编自 Karras et al. (2020b)。
+
+::: info 生成文本示例
+The moon had risen by the time I reached the edge of the forest, and the light that filtered through the trees was silver and cold. I shivered, though I was not cold, and quickened my pace. I had never been so far from the village before, and I was not sure what to expect. I had been walking for hours, and I was tired and hungry. I had left in such a hurry that I had not thought to pack any food, and I had not thought to bring a weapon. I was unarmed and alone in a strange place, and I did not know what I was doing.
+
+I had been walking for so long that I had lost all sense of time, and I had no idea how far I had come. I only knew that I had to keep going. I had to find her. I was getting close. I could feel it. She was nearby, and she was in trouble. I had to find her and help her, before it was too late.
+:::
 
 > **图 1.6** 从文本数据生成模型中合成的短篇小说。该模型描述了一个概率分布，为每个可能的输出字符串赋予一个概率。从模型中采样所生成的字符串遵循训练数据（此处为短篇小说）的统计规律，但从未出现过。
 
+<div align="center">
+
+![图 1.7](/figures/ch01/fig-1.7.png)
+
+</div>
+
 > **图 1.7** 图像修复。在原始图像（左）中，男孩被金属线缆遮挡。去除这些不需要的区域后（中），生成模型在保持其余像素不变的约束下合成了新图像（右）。改编自 Saharia et al. (2022a)。
+
+::: info 条件文本生成示例
+I was a little nervous before my first lecture at the University of Bath. It seemed like there were hundreds of students and they looked intimidating. I stepped up to the lectern and was about to speak when something bizarre happened.
+
+*Suddenly, the room was filled with a deafening noise, like a giant roar. It was so loud that I couldn't hear anything else and I had to cover my ears. I could see the students looking around, confused and frightened. Then, as quickly as it had started, the noise stopped and the room was silent again.*
+
+*I stood there for a few moments, trying to make sense of what had just happened. Then I realized that the students were all staring at me, waiting for me to say something. I tried to think of something witty or clever to say, but my mind was blank. So I just said, "Well, that was strange," and then I started my lecture.*
+:::
 
 > **图 1.8** 条件文本合成。给定一段初始文本（黑色部分），文本生成模型可以通过合成"缺失"的后续部分来合理地续写该字符串。由 GPT3 (Brown et al., 2020) 生成。
 
@@ -88,9 +138,27 @@
 
 这些模型还催生了操控真实数据的新方法。例如，考虑找到两个真实样本所对应的潜变量，我们可以在它们的潜在表示之间进行插值，并将中间位置映射回数据空间，从而在两个样本之间实现平滑过渡（图 1.11）。
 
+<div align="center">
+
+![图 1.9](/figures/ch01/fig-1.9.png)
+
+</div>
+
 > **图 1.9** 人脸的变化。人脸大约包含 42 块肌肉，因此仅用 42 个数字就可以描述同一人在相同光照下的面部图像的大部分变化。一般来说，图像、音乐和文本等数据集可以用相对较少的底层变量来描述，尽管将这些变量与特定的物理机制对应起来通常更加困难。图像来自 Dynamic FACES 数据库 (Holland et al., 2019)。
 
+<div align="center">
+
+![图 1.10](/figures/ch01/fig-1.10.png)
+
+</div>
+
 > **图 1.10** 潜变量。许多生成模型使用深度学习模型来描述低维"潜"变量与观测到的高维数据之间的关系。潜变量在设计上具有简单的概率分布。因此，可以通过从简单分布中采样潜变量，然后利用深度学习模型将采样映射到观测数据空间来生成新样本。
+
+<div align="center">
+
+![图 1.11](/figures/ch01/fig-1.11.png)
+
+</div>
 
 > **图 1.11** 图像插值。每行中左右两端的图像是真实图像，中间的三幅图像是由生成模型创建的插值序列。支撑这些插值的生成模型已经学习到，所有图像都可以由一组底层潜变量生成。通过找到两幅真实图像对应的潜变量值，对其进行插值，然后利用中间变量生成新图像，我们可以产生既视觉逼真又融合了两幅原始图像特征的中间结果。上行改编自 Sauer et al. (2022)。下行改编自 Ramesh et al. (2022)。
 
@@ -99,6 +167,12 @@
 具有潜变量的生成模型还能增强输出具有结构的监督学习模型（图 1.4）。例如，考虑学习根据文字描述预测对应图像的任务。与其直接将文本输入映射为图像，不如学习解释文本的潜变量与解释图像的潜变量之间的关系。
 
 这样做有三个优势。首先，由于输入和输出现在都是低维的，学习该映射所需的文本/图像对可能更少。其次，生成逼真图像的可能性更大；潜变量的任何合理取值都应该能生成像样的样本。第三，如果我们在两组潜变量之间的映射或从潜变量到图像的映射中引入随机性，就能生成多幅均与文字描述很好匹配的不同图像（图 1.12）。
+
+<div align="center">
+
+![图 1.12](/figures/ch01/fig-1.12.png)
+
+</div>
 
 > **图 1.12** 根据描述"时代广场上骑滑板的泰迪熊"生成的多幅图像。由 DALL·E-2 (Ramesh et al., 2022) 生成。
 
@@ -117,6 +191,12 @@
 探索与利用的权衡同样在这两个示例中有所体现。机器人可能发现它可以侧身趴下、用一条腿推进前行。这种策略确实能让机器人移动并获得奖励，但速度远不如最优方案——靠双腿站立行走。因此，它面临着在利用已知策略（如何笨拙地在地板上滑行）和探索动作空间（可能发现快得多的运动方式）之间的选择。同样，在国际象棋中，智能体可能学会了一套合理的开局走法，它应该利用这些知识还是去探索不同的开局序列？
 
 深度学习如何融入强化学习框架或许并不显而易见。有多种可能的方法，其中一种技术是使用深度网络来构建从观测到的世界状态到动作的映射。这被称为*策略网络*（policy network）。在机器人的例子中，策略网络会学习从传感器测量值到关节运动的映射。在国际象棋的例子中，网络会学习从棋盘当前状态到走法选择的映射（图 1.13）。
+
+<div align="center">
+
+![图 1.13](/figures/ch01/fig-1.13.png)
+
+</div>
 
 > **图 1.13** 强化学习中的策略网络。将深度神经网络融入强化学习的一种方式是用它来定义从状态（此处为棋盘局面）到动作（可能的走法）的映射。这种映射称为*策略*（policy）。
 
