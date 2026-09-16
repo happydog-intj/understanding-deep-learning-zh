@@ -10,6 +10,12 @@
 
 本节我们推导一种构建损失函数的方法。考虑一个模型 $\text{f}[\mathbf{x}, \boldsymbol{\phi}]$，它以参数 $\boldsymbol{\phi}$ 从输入 $\mathbf{x}$ 计算输出。到目前为止，我们一直认为模型直接计算预测 $\mathbf{y}$。现在我们转换视角，将模型视为计算给定输入 $\mathbf{x}$ 时可能输出 $\mathbf{y}$ 上的*条件概率*分布 $Pr(\mathbf{y}|\mathbf{x})$。损失鼓励每个训练输出 $\mathbf{y}_i$ 在由对应输入 $\mathbf{x}_i$ 计算得到的分布 $Pr(\mathbf{y}_i|\mathbf{x}_i)$ 下具有高概率（图 5.1）。
 
+<div align="center">
+
+![图 5.1](/figures/ch05/LossDataTypes.png)
+
+</div>
+
 > **图 5.1** 预测输出上的分布。a) 回归任务，目标是根据训练数据 $\{x_i, y_i\}$（橙色点）从输入 $x$ 预测实值输出 $y$。对于每个输入值 $x$，机器学习模型预测输出 $y \in \mathbb{R}$ 上的一个分布 $Pr(y|x)$（青色曲线展示了 $x=2.0$ 和 $x=7.0$ 处的分布）。最小化损失函数对应于最大化训练输出 $y_i$ 在由对应输入 $x_i$ 预测的分布下的概率。b) 对于离散类别 $y \in \{1,2,3,4\}$ 的分类任务，我们使用离散概率分布，因此模型为每个 $x_i$ 值预测四个可能 $y_i$ 值上的不同直方图。c) 对于计数预测 $y \in \{0,1,2,\ldots\}$ 和 d) 方向预测 $y \in (-\pi, \pi]$，我们分别使用定义在正整数和圆形域上的分布。
 
 ### 5.1.1 计算输出上的分布
@@ -37,6 +43,12 @@ $$Pr(\mathbf{y}_1, \mathbf{y}_2, \ldots, \mathbf{y}_I | \mathbf{x}_1, \mathbf{x}
 $$\hat{\boldsymbol{\phi}} = \underset{\boldsymbol{\phi}}{\text{argmax}} \left[ \prod_{i=1}^{I} Pr(\mathbf{y}_i|\text{f}[\mathbf{x}_i, \boldsymbol{\phi}]) \right] = \underset{\boldsymbol{\phi}}{\text{argmax}} \left[ \log \left[ \prod_{i=1}^{I} Pr(\mathbf{y}_i|\text{f}[\mathbf{x}_i, \boldsymbol{\phi}]) \right] \right] = \underset{\boldsymbol{\phi}}{\text{argmax}} \left[ \sum_{i=1}^{I} \log \left[ Pr(\mathbf{y}_i|\text{f}[\mathbf{x}_i, \boldsymbol{\phi}]) \right] \right]. \tag{5.3}$$
 
 这个*对数似然*（log-likelihood）准则是等价的，因为对数是单调递增函数：若 $z > z'$，则 $\log[z] > \log[z']$，反之亦然（图 5.2）。因此，当我们改变模型参数 $\boldsymbol{\phi}$ 来改进对数似然准则时，也同时改进了原始的最大似然准则。这也意味着两个准则的全局最大值必定在同一位置，所以最优模型参数 $\hat{\boldsymbol{\phi}}$ 在两种情况下是相同的。然而，对数似然准则具有使用项的和而非乘积的实际优势，因此用有限精度表示不会有问题。
+
+<div align="center">
+
+![图 5.2](/figures/ch05/LossLog.png)
+
+</div>
 
 > **图 5.2** 对数变换。a) 对数函数是单调递增的。若 $z > z'$，则 $\log[z] > \log[z']$。由此可知，任何函数 $\text{g}[z]$ 的最大值与 $\log[\text{g}[z]]$ 的最大值将出现在同一位置。b) 一个函数 $\text{g}[z]$。c) 该函数的对数 $\log[\text{g}[z]]$。$\text{g}[z]$ 上所有具有正斜率的位置在对数变换后保持正斜率，具有负斜率的位置保持负斜率。最大值的位置不变。
 
@@ -86,6 +98,12 @@ $$L[\boldsymbol{\phi}] = -\sum_{i=1}^{I} \log \left[ Pr(y_i|\text{f}[\mathbf{x}_
 
 训练模型时，我们寻找使该损失最小化的参数 $\hat{\boldsymbol{\phi}}$。
 
+<div align="center">
+
+![图 5.3](/figures/ch05/LossNorm.png)
+
+</div>
+
 > **图 5.3** 单变量正态分布（也称高斯分布）定义在实数线 $z \in \mathbb{R}$ 上，有参数 $\mu$ 和 $\sigma^2$。均值 $\mu$ 决定峰值的位置。方差 $\sigma^2$ 的正平方根（标准差）决定分布的宽度。由于概率密度总和为一，随着方差减小，峰值变高，分布变窄。
 
 ### 5.3.1 最小二乘损失函数
@@ -107,6 +125,12 @@ $$= \underset{\boldsymbol{\phi}}{\text{argmin}} \left[ \sum_{i=1}^{I} (y_i - \te
 $$L[\boldsymbol{\phi}] = \sum_{i=1}^{I} (y_i - \text{f}[\mathbf{x}_i, \boldsymbol{\phi}])^2. \tag{5.11}$$
 
 我们看到，最小二乘损失函数自然地从以下假设中推导出来：(i) 预测是独立的，且 (ii) 从均值为 $\mu = \text{f}[\mathbf{x}_i, \boldsymbol{\phi}]$ 的正态分布中抽取（图 5.4）。
+
+<div align="center">
+
+![图 5.4](/figures/ch05/LossNormalRegression.png)
+
+</div>
 
 > **图 5.4** 正态分布下最小二乘与最大似然损失的等价性。a) 考虑图 2.2 中的线性模型。最小二乘准则最小化模型预测 $\text{f}[x_i, \boldsymbol{\phi}]$（绿色线）与真实输出值 $y_i$（橙色点）之间偏差（虚线）的平方和。此处拟合效果好，因此偏差很小。b) 对于这组参数，拟合效果差，偏差的平方和很大。c) 最小二乘准则源于假设模型预测的是输出上正态分布的均值，且我们最大化概率。对于第一种情况，模型拟合良好，所以数据的概率 $Pr(y_i|x_i)$（水平橙色虚线）很大（负对数概率很小）。d) 对于第二种情况，模型拟合差，概率很小，负对数概率很大。
 
@@ -144,6 +168,12 @@ $$\hat{\boldsymbol{\phi}} = \underset{\boldsymbol{\phi}}{\text{argmin}} \left[ -
 
 同方差和异方差模型在图 5.5 中进行了比较。
 
+<div align="center">
+
+![图 5.5](/figures/ch05/LossHeteroscedastic.png)
+
+</div>
+
 > **图 5.5** 同方差与异方差回归。a) 同方差回归的浅层神经网络仅预测输出分布的均值 $\mu$。b) 结果是，虽然均值（蓝色线）是输入 $x$ 的分段线性函数，但方差处处恒定（箭头和灰色区域表示 $\pm 2$ 个标准差）。c) 异方差回归的浅层神经网络还预测方差 $\sigma^2$（或更精确地说，计算其平方根后再平方）。d) 标准差现在也成为输入 $x$ 的分段线性函数。
 
 ## 5.4 示例 2：二元分类
@@ -174,9 +204,27 @@ $$L[\boldsymbol{\phi}] = \sum_{i=1}^{I} -(1 - y_i)\log\left[1 - \text{sig}[\text
 
 经过变换的模型输出 $\text{sig}[\text{f}[\mathbf{x}, \boldsymbol{\phi}]]$ 预测伯努利分布的参数 $\lambda$。它表示 $y=1$ 的概率，由此可得 $1 - \lambda$ 表示 $y=0$ 的概率。当我们进行推断时，我们可能需要 $y$ 的点估计，因此如果 $\lambda > 0.5$ 则令 $y = 1$，否则令 $y = 0$。
 
+<div align="center">
+
+![图 5.6](/figures/ch05/LossBern.png)
+
+</div>
+
 > **图 5.6** 伯努利分布。伯努利分布定义在域 $z \in \{0, 1\}$ 上，有一个参数 $\lambda$，表示观测到 $z=1$ 的概率。由此可得观测到 $z=0$ 的概率为 $1 - \lambda$。
 
+<div align="center">
+
+![图 5.7](/figures/ch05/LossLogisticSigmoid.png)
+
+</div>
+
 > **图 5.7** 逻辑 sigmoid 函数。该函数将实数线 $z \in \mathbb{R}$ 映射到零和一之间的数，即 $\text{sig}[z] \in [0, 1]$。输入 0 被映射到 0.5。负输入被映射到小于 0.5 的数，正输入被映射到大于 0.5 的数。
+
+<div align="center">
+
+![图 5.8](/figures/ch05/LossBinaryClassification.png)
+
+</div>
 
 > **图 5.8** 二元分类模型。a) 网络输出是一个可以取任意实数值的分段线性函数。b) 经逻辑 sigmoid 函数变换后，将这些值压缩到 $[0, 1]$ 范围。c) 变换后的输出预测 $y=1$ 的概率 $\lambda$（实线）。$y=0$ 的概率因此为 $1 - \lambda$（虚线）。对于任何固定的 $x$（垂直切面），我们可以得到类似于图 5.6 中伯努利分布的两个值。损失函数偏好使与正例 $y_i = 1$ 关联的 $x_i$ 位置处的 $\lambda$ 值较大、与负例 $y_i = 0$ 关联的 $x_i$ 位置处的 $\lambda$ 值较小的模型参数。
 
@@ -208,7 +256,19 @@ $$L[\boldsymbol{\phi}] = -\sum_{i=1}^{I} \log\left[\text{softmax}_{y_i}\left[\te
 
 经变换的模型输出表示可能类别 $y \in \{1, 2, \ldots, K\}$ 上的类别分布。为获得点估计，我们取最可能的类别 $\hat{y} = \text{argmax}_k\left[Pr(y = k | \text{f}[\mathbf{x}, \hat{\boldsymbol{\phi}}])\right]$。这对应于图 5.10 中该 $\mathbf{x}$ 值处最高曲线所属的类别。
 
+<div align="center">
+
+![图 5.9](/figures/ch05/LossCategorical.png)
+
+</div>
+
 > **图 5.9** 类别分布。类别分布将概率分配给 $K > 2$ 个类别，其关联概率为 $\lambda_1, \lambda_2, \ldots, \lambda_K$。此处有五个类别，即 $K = 5$。为确保这是一个有效的概率分布，每个参数 $\lambda_k$ 必须在 $[0, 1]$ 范围内，且所有 $K$ 个参数之和必须为一。
+
+<div align="center">
+
+![图 5.10](/figures/ch05/LossMultiClassClassification.png)
+
+</div>
 
 > **图 5.10** $K=3$ 类的多类分类。a) 网络有三个分段线性输出，可取任意值。b) 经 softmax 函数处理后，这些输出被约束为非负且和为一。因此，对于给定输入 $\mathbf{x}$，我们计算出类别分布的有效参数：该图的任何垂直切面产生三个和为一的值，它们构成类似于图 5.9 中类别分布的条形高度。
 
@@ -285,6 +345,12 @@ $$\hat{\boldsymbol{\phi}} = \underset{\boldsymbol{\phi}}{\text{argmin}} \left[ -
 这恰恰就是第 5.2 节方法中的负对数似然准则。
 
 由此可知，负对数似然准则（来自最大化数据似然）和交叉熵准则（来自最小化模型分布与经验数据分布之间的距离）是等价的。
+
+<div align="center">
+
+![图 5.12](/figures/ch05/LossCrossEntropy.png)
+
+</div>
 
 > **图 5.12** 交叉熵方法。a) 训练样本的经验分布（箭头表示 Dirac delta 函数）。b) 具有参数 $\boldsymbol{\theta} = \{\mu, \sigma^2\}$ 的模型分布（正态分布）。在交叉熵方法中，我们最小化这两个分布之间的距离（KL 散度），将其作为模型参数 $\boldsymbol{\theta}$ 的函数。
 

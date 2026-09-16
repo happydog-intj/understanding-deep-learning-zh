@@ -49,6 +49,12 @@ $$
 
 通过简单的似然和先验表达式，我们描述了一个复杂的多模态概率分布。
 
+<div align="center">
+
+![图 17.1](/figures/ch17/VAEMixGauss.png)
+
+</div>
+
 > **图 17.1** 高斯混合模型（MoG）。a) MoG 将一个复杂的概率分布（青色曲线）描述为高斯分量（虚线曲线）的加权和。b) 这个和是连续观测数据 $x$ 与离散潜变量 $z$ 之间的联合密度 $Pr(x,z)$ 的边缘化。
 
 ## 17.2 非线性潜变量模型
@@ -82,11 +88,23 @@ $$
 
 这可以看作球形高斯的无限加权和（即无限混合），其中权重是 $Pr(\mathbf{z})$，均值是网络输出 $\mathbf{f}[\mathbf{z},\boldsymbol{\phi}]$（图 17.2）。
 
+<div align="center">
+
+![图 17.2](/figures/ch17/VAENonLinearLVM.png)
+
+</div>
+
 > **图 17.2** 非线性潜变量模型。一个复杂的二维密度 $Pr(\mathbf{x})$（右）是通过对联合分布 $Pr(\mathbf{x},z)$（左）在潜变量 $z$ 上的边缘化来创建的；为了创建 $Pr(\mathbf{x})$，我们对 $z$ 维度上的三维体积进行积分。对于每个 $z$，$\mathbf{x}$ 上的分布是一个球形高斯（展示了两个切片），其均值 $\mathbf{f}[z,\boldsymbol{\phi}]$ 是 $z$ 的非线性函数且依赖于参数 $\boldsymbol{\phi}$。分布 $Pr(\mathbf{x})$ 是这些高斯的加权和。
 
 ### 17.2.1 生成
 
 可以使用**祖先采样**（ancestral sampling）生成新样本 $\mathbf{x}^*$（图 17.3）。我们从先验 $Pr(\mathbf{z})$ 中抽取 $\mathbf{z}^*$，并将其通过网络 $\mathbf{f}[\mathbf{z}^*,\boldsymbol{\phi}]$ 来计算似然 $Pr(\mathbf{x}|\mathbf{z}^*,\boldsymbol{\phi})$（等式 17.6）的均值，然后从中抽取 $\mathbf{x}^*$。由于先验和似然都是正态分布，因此这很直观。
+
+<div align="center">
+
+![图 17.3](/figures/ch17/VAENonLinearLVMGen.png)
+
+</div>
 
 > **图 17.3** 从非线性潜变量模型生成。a) 从潜变量的先验概率 $Pr(z)$ 中抽取样本 $z^*$。b) 从 $Pr(\mathbf{x}|z^*,\boldsymbol{\phi})$ 中抽取样本 $\mathbf{x}^*$。这是一个球形高斯，其均值是 $z^*$ 的非线性函数 $\mathbf{f}[\bullet, \boldsymbol{\phi}]$ 且方差固定为 $\sigma^2\mathbf{I}$。c) 如果重复多次这个过程，就恢复了密度 $Pr(\mathbf{x}|\boldsymbol{\phi})$。
 
@@ -144,7 +162,19 @@ $$
 
 其中 $h[y]$ 是 $y$ 的函数。这是因为 $h[y]$ 是另一个具有新分布的随机变量。由于我们从未指定 $Pr(y)$，因此该关系仍然成立。
 
+<div align="center">
+
+![图 17.4](/figures/ch17/VAEJensen.png)
+
+</div>
+
 > **图 17.4** Jensen 不等式（离散情形）。对数函数（黑色曲线）是一个凹函数；你可以在曲线上任意两点之间画一条直线，这条直线始终在曲线下方。因此，对数函数上六个点的任何凸组合（正权重且和为一的加权和）都必须落在曲线下方的灰色区域中。这里，我们对这些点等权平均，得到青色点。由于该点在曲线下方，$\log[\mathbb{E}[y]] > \mathbb{E}[\log[y]]$。
+
+<div align="center">
+
+![图 17.5](/figures/ch17/VAEJensenUnder.png)
+
+</div>
 
 > **图 17.5** Jensen 不等式（连续情形）。对于凹函数，计算分布 $Pr(y)$ 的期望并将其通过函数，得到的结果大于或等于先将变量 $y$ 通过函数再计算新变量的期望。对于对数函数，有 $\log[\mathbb{E}[y]] \geq \mathbb{E}[\log[y]]$。
 
@@ -178,6 +208,12 @@ $$
 
 为了学习非线性潜变量模型，我们将这个量作为 $\boldsymbol{\phi}$ 和 $\boldsymbol{\theta}$ 的函数来最大化。计算这个量的神经架构就是 VAE。
 
+<div align="center">
+
+![图 17.6](/figures/ch17/VAEELBO.png)
+
+</div>
+
 > **图 17.6** 证据下界（ELBO）。目标是最大化关于参数 $\boldsymbol{\phi}$ 的对数似然 $\log[Pr(\mathbf{x}|\boldsymbol{\phi})]$（黑色曲线）。ELBO 是一个处处位于对数似然下方的函数。它是 $\boldsymbol{\phi}$ 和第二组参数 $\boldsymbol{\theta}$ 的函数。固定 $\boldsymbol{\theta}$，我们得到 $\boldsymbol{\phi}$ 的一条曲线（两条彩色曲线对应 $\boldsymbol{\theta}$ 的不同值）。因此，我们可以通过改进 a) 新参数 $\boldsymbol{\theta}$（从彩色曲线移到彩色曲线）或 b) 原参数 $\boldsymbol{\phi}$（沿当前彩色曲线移动）来增加对数似然。
 
 ## 17.4 ELBO 的性质
@@ -202,6 +238,12 @@ $$
 其中，第三行和第四行之间，第一个积分消失了，因为 $\log[Pr(\mathbf{x}|\boldsymbol{\phi})]$ 不依赖于 $\mathbf{z}$，且概率分布 $q(\mathbf{z}|\boldsymbol{\theta})$ 的积分为一。在最后一行，我们使用了 **Kullback-Leibler（KL）散度**的定义。
 
 这个等式表明，ELBO 是原始对数似然减去 KL 散度 $\text{D}_{KL}[q(\mathbf{z}|\boldsymbol{\theta})\|Pr(\mathbf{z}|\mathbf{x},\boldsymbol{\phi})]$。KL 散度衡量分布之间的"距离"，只能取非负值。因此 ELBO 是 $\log[Pr(\mathbf{x}|\boldsymbol{\phi})]$ 的下界。当 $q(\mathbf{z}|\boldsymbol{\theta}) = Pr(\mathbf{z}|\mathbf{x},\boldsymbol{\phi})$ 时，KL 距离为零，下界是**紧致的**。这是潜变量 $\mathbf{z}$ 在给定观测数据 $\mathbf{x}$ 下的**后验分布**（posterior distribution）；它指示哪些潜变量值可能对该数据点负责（图 17.7）。
+
+<div align="center">
+
+![图 17.7](/figures/ch17/VAENonLinearLVMPost2.png)
+
+</div>
 
 > **图 17.7** 潜变量上的后验分布。a) 后验分布 $Pr(z|\mathbf{x}^*,\boldsymbol{\phi})$ 是在给定数据点 $\mathbf{x}^*$ 时，潜变量 $z$ 的取值上的分布。我们通过贝叶斯法则 $Pr(z|\mathbf{x}^*,\boldsymbol{\phi}) \propto Pr(\mathbf{x}^*|z,\boldsymbol{\phi})Pr(z)$ 来计算。b) 右侧第一项（似然）通过评估 $\mathbf{x}^*$ 对于每个 $z$ 值在对称高斯下的概率来计算。这里，它更可能由 $z_1$ 而非 $z_2$ 产生。第二项是潜变量上的先验概率 $Pr(z)$。将这两个因子相乘并归一化使分布和为一，就得到后验 $Pr(z|\mathbf{x}^*,\boldsymbol{\phi})$。
 
@@ -244,6 +286,12 @@ q(\mathbf{z}|\mathbf{x},\boldsymbol{\theta}) = \text{Norm}_{\mathbf{z}}\left[\ma
 $$
 
 其中 $\mathbf{g}[\mathbf{x},\boldsymbol{\theta}]$ 是第二个神经网络，参数为 $\boldsymbol{\theta}$，预测正态变分近似的均值 $\boldsymbol{\mu}$ 和方差 $\boldsymbol{\Sigma}$。
+
+<div align="center">
+
+![图 17.8](/figures/ch17/VAEVariational.png)
+
+</div>
 
 > **图 17.8** 变分近似。后验 $Pr(\mathbf{z}|\mathbf{x}^*,\boldsymbol{\phi})$ 无法以封闭形式计算。变分近似选择一族分布 $q(\mathbf{z}|\mathbf{x},\boldsymbol{\theta})$（这里是高斯分布），试图找到这个族中与真实后验最接近的成员。a) 有时近似效果很好（青色曲线），与真实后验（橙色曲线）很接近。b) 然而，如果后验是多模态的（如图 17.7），那么高斯近似就会很差。
 
@@ -293,7 +341,19 @@ $$
 
 VAE 将 ELBO 计算为 $\boldsymbol{\phi}$ 和 $\boldsymbol{\theta}$ 的函数。为了最大化这个下界，我们将小批量样本通过网络并使用 SGD 或 Adam 等优化算法更新这些参数。ELBO 关于参数的梯度照常使用自动微分计算。在这个过程中，我们既在彩色曲线之间移动（改变 $\boldsymbol{\theta}$），又沿着曲线移动（改变 $\boldsymbol{\phi}$），如图 17.10 所示。在此过程中，参数 $\boldsymbol{\phi}$ 发生变化，使非线性潜变量模型为数据分配更高的似然。
 
+<div align="center">
+
+![图 17.9](/figures/ch17/VAEArch.png)
+
+</div>
+
 > **图 17.9** 变分自编码器。编码器 $\mathbf{g}[\mathbf{x},\boldsymbol{\theta}]$ 接收训练样本 $\mathbf{x}$，预测变分分布 $q(\mathbf{z}|\mathbf{x},\boldsymbol{\theta})$ 的参数 $\boldsymbol{\mu},\boldsymbol{\Sigma}$。我们从该分布中采样，然后使用解码器 $\mathbf{f}[\mathbf{z},\boldsymbol{\phi}]$ 预测数据 $\mathbf{x}$。损失函数是负 ELBO，取决于预测的准确性以及变分分布 $q(\mathbf{z}|\mathbf{x},\boldsymbol{\theta})$ 与先验 $Pr(\mathbf{z})$ 的相似程度（等式 17.21）。
+
+<div align="center">
+
+![图 17.10](/figures/ch17/VAEOpt.png)
+
+</div>
 
 > **图 17.10** VAE 在每次迭代中更新决定下界的两个因素。解码器的参数 $\boldsymbol{\phi}$ 和编码器的参数 $\boldsymbol{\theta}$ 都被操纵以增加这个下界。
 
@@ -309,6 +369,12 @@ $$
 $$
 
 从目标高斯分布中抽样。现在我们可以照常计算导数，因为反向传播算法不需要通过随机分支传递。这被称为**重参数化技巧**（reparameterization trick）（图 17.11）。
+
+<div align="center">
+
+![图 17.11](/figures/ch17/VAEReparam.png)
+
+</div>
 
 > **图 17.11** 重参数化技巧。在原始架构（图 17.9）中，我们无法轻易地通过采样步骤进行反向传播。重参数化技巧将采样步骤从主管道中移出；我们从标准正态分布中抽样，并将其与预测的均值和协方差结合以获得变分分布的样本。
 
@@ -354,6 +420,12 @@ $$
 
 这样，我们可以近似新样本的概率。有了足够多的样本，这将提供比下界更好的估计，可以用来通过评估测试数据的对数似然来评价模型质量。或者，它可以用作判断新样本是否属于该分布或是否异常的标准。
 
+<div align="center">
+
+![图 17.12](/figures/ch17/VAEGen.png)
+
+</div>
+
 > **图 17.12** 从在 CELEBA 上训练的标准 VAE 采样。每列中抽取一个潜变量 $\mathbf{z}^*$，通过模型预测均值 $\mathbf{f}[\mathbf{z}^*,\boldsymbol{\phi}]$，然后加上独立的高斯噪声（见图 17.3）。a) 一组样本，是 b) 预测均值和 c) 球形高斯噪声向量的和。加噪声前图像看起来太平滑，加噪声后又太嘈杂。这是典型的，通常展示无噪声版本，因为噪声被认为代表图像中未建模的方面。改编自 Dorta et al. (2018)。d) 现在可以使用层次先验、专门的架构和仔细的正则化从 VAE 生成高质量图像。改编自 Vahdat & Kautz (2020)。
 
 ### 17.8.2 生成
@@ -371,6 +443,12 @@ VAE 也可以用来修改真实数据。数据点 $\mathbf{x}$ 可以通过 (i) 
 现在，感兴趣的图像被投影到潜空间，然后通过加减这些向量来修改表示。为了生成中间图像，使用**球面线性插值**（spherical linear interpolation）或 *Slerp* 而非线性插值。在三维空间中，这就是沿球面表面插值与在球体内直接挖隧道之间的区别。
 
 编码（并可能修改）输入数据然后再解码的过程被称为**重合成**（resynthesis）。这也可以用 GAN 和归一化流来完成。然而，在 GAN 中没有编码器，因此必须使用单独的过程来找到与观测数据对应的潜变量。
+
+<div align="center">
+
+![图 17.13](/figures/ch17/VAESmile.png)
+
+</div>
 
 > **图 17.13** 重合成。左侧的原始图像使用编码器投影到潜空间，预测的高斯均值被选为表示该图像。网格中心左侧的图像是输入的重构。其他图像是在潜空间中沿表示微笑/中性（水平）和嘴巴张开/闭合（垂直）方向操纵后的重构。改编自 White (2016)。
 
@@ -395,6 +473,12 @@ $$
 $$
 
 其中 $\beta > 1$ 决定先验 $Pr(\mathbf{z})$ 的偏差相对于重构误差的权重有多大。由于先验通常是具有球形协方差矩阵的多元正态分布，其维度是独立的，上调该项鼓励后验分布的相关性更小。另一个变体是**总相关 VAE**（total correlation VAE），它添加了一个减少潜空间中变量总相关性的项（图 17.14），并最大化一小部分潜变量与观测之间的互信息。
+
+<div align="center">
+
+![图 17.14](/figures/ch17/VAEDisentangle.png)
+
+</div>
 
 > **图 17.14** 总相关 VAE 中的解缠。VAE 模型被修改使得损失函数鼓励潜变量的总相关性被最小化，从而鼓励解缠。在椅子图像数据集上训练时，几个潜维度具有清晰的真实世界解释，包括 a) 旋转、b) 整体大小和 c) 椅腿（转椅 vs 普通椅）。在每种情况下，中间列展示模型的样本，向左或向右移动时，我们在潜空间中减去或添加一个坐标向量。改编自 Chen et al. (2018d)。
 

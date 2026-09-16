@@ -38,6 +38,12 @@ $$\Gamma[x] = \int_0^{\infty} t^{x-1} e^{-t} dt. \tag{B.2}$$
 
 $$\int \text{f}[\mathbf{x}] \delta[\mathbf{x} - \mathbf{x}_0] d\mathbf{x} = \text{f}[\mathbf{x}_0]. \tag{B.3}$$
 
+<div align="center">
+
+![图 B.1](/figures/appendix/AppLogExp.png)
+
+</div>
+
 > **图 B.1** 指数函数、对数函数和伽马函数。a) 指数函数将实数映射为正数，它是一个凸函数。b) 对数是指数函数的逆函数，将正数映射为实数，它是一个凹函数。c) 伽马函数是阶乘函数的连续扩展，使得 $\Gamma[x] = (x-1)!$，对 $x \in \{1, 2, \ldots\}$。
 
 ### B.1.4 斯特林公式
@@ -45,6 +51,12 @@ $$\int \text{f}[\mathbf{x}] \delta[\mathbf{x} - \mathbf{x}_0] d\mathbf{x} = \tex
 斯特林公式（Stirling's formula）（图 B.2）使用以下公式近似阶乘函数（以及伽马函数）：
 
 $$x! \approx \sqrt{2\pi x} \left(\frac{x}{e}\right)^x. \tag{B.4}$$
+
+<div align="center">
+
+![图 B.2](/figures/appendix/AppStirling.png)
+
+</div>
 
 > **图 B.2** 斯特林公式。阶乘函数 $x!$ 可以用斯特林公式 $\text{Stir}[x]$ 近似，后者对每个实数值都有定义。
 
@@ -117,6 +129,12 @@ $$(\mathbf{AB})^{-1} = \mathbf{B}^{-1}\mathbf{A}^{-1}. \tag{B.13}$$
 ### B.3.7 特征谱
 
 如果我们将单位圆上的一组二维点乘以一个 $2 \times 2$ 矩阵 $\mathbf{A}$，它们会映射到一个椭圆（图 B.3）。该椭圆的长轴和短轴的半径（即最长和最短方向）对应于矩阵*奇异值*（singular value）$\lambda_1$ 和 $\lambda_2$ 的大小。同样的思想适用于更高维度。一个 $D$ 维球体被 $D \times D$ 矩阵 $\mathbf{A}$ 映射为一个 $D$ 维椭球体。该椭球体的 $D$ 个主轴的半径决定了奇异值的大小。对于对称方阵，相同的信息由*特征值*（eigenvalue）捕获，此时特征值与奇异值相同。
+
+<div align="center">
+
+![图 B.3](/figures/appendix/AppEigenvalue.png)
+
+</div>
 
 > **图 B.3** 奇异值。当单位圆上的点 $\{\mathbf{x}_i\}$ 通过线性变换 $\mathbf{x}'_i = \mathbf{Ax}_i$ 变换为点 $\{\mathbf{x}'_i\}$ 时，它们被映射到一个椭圆。椭圆长轴（最长）轴的长度是矩阵第一个奇异值的大小，短轴（最短）轴的长度是第二个奇异值的大小。
 

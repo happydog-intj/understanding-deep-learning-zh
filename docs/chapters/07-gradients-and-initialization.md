@@ -47,7 +47,19 @@ $$\frac{\partial \ell_i}{\partial \boldsymbol{\beta}_k} \qquad \text{和} \qquad
 - 要计算馈入隐藏层 $\mathbf{h}_2$ 的权重或偏置的微小改变如何影响损失，我们需要知道 (i) 层 $\mathbf{h}_2$ 的变化如何影响 $\mathbf{h}_3$，(ii) $\mathbf{h}_3$ 如何改变模型输出，以及 (iii) 输出如何改变损失（图 7.2b）。
 - 要计算馈入隐藏层 $\mathbf{h}_1$ 的权重或偏置的微小改变如何影响损失，我们需要知道 (i) 层 $\mathbf{h}_1$ 的变化如何影响层 $\mathbf{h}_2$，(ii) 层 $\mathbf{h}_2$ 的变化如何影响层 $\mathbf{h}_3$，(iii) 层 $\mathbf{h}_3$ 如何改变模型输出，以及 (iv) 模型输出如何改变损失（图 7.2c）。
 
+<div align="center">
+
+![图 7.1](/figures/ch07/Train2BP1.png)
+
+</div>
+
 > **图 7.1** 反向传播前向传播。目标是计算损失 $\ell$ 关于每个权重（箭头）和偏置（未显示）的导数。换言之，我们想知道每个参数的微小改变将如何影响损失。每个权重将其源处的隐藏单元激活值相乘，并将结果贡献给目标处的隐藏单元。因此，对权重的任何微小改变的效果都会被源隐藏单元的激活值缩放。例如，蓝色权重作用于第 1 层的第二个隐藏单元；如果该单元的激活值翻倍，则对蓝色权重微小改变的效果也会翻倍。因此，要计算权重的导数，我们需要计算并存储隐藏层处的激活值。这被称为前向传播，因为它涉及按顺序运行网络方程。
+
+<div align="center">
+
+![图 7.2](/figures/ch07/Train2BP2.png)
+
+</div>
 
 > **图 7.2** 反向传播的反向传播。a) 要计算馈入层 $\mathbf{h}_3$ 的权重（蓝色箭头）的改变如何影响损失，我们需要知道 $\mathbf{h}_3$ 中的隐藏单元如何改变模型输出 $\text{f}$，以及 $\text{f}$ 如何改变损失（橙色箭头）。b) 要计算馈入 $\mathbf{h}_2$ 的权重（蓝色箭头）的微小改变如何影响损失，我们需要知道 (i) $\mathbf{h}_2$ 中的隐藏单元如何改变 $\mathbf{h}_3$，(ii) $\mathbf{h}_3$ 如何改变 $\text{f}$，以及 (iii) $\text{f}$ 如何改变损失（橙色箭头）。c) 类似地，要计算馈入 $\mathbf{h}_1$ 的权重（蓝色箭头）的微小改变如何影响损失，我们需要知道 $\mathbf{h}_1$ 如何改变 $\mathbf{h}_2$，以及这些改变如何通过网络传播到损失（橙色箭头）。反向传播先在网络末端计算导数，然后反向回溯以利用这些计算中固有的冗余性。
 
@@ -83,6 +95,12 @@ $$\begin{aligned}
 
 反向传播算法是一种高效的方法，可同时计算所有这些导数。它包含 (i) 前向传播，在其中我们计算并存储一系列中间值和网络输出；以及 (ii) 反向传播，在其中我们从网络末端开始计算每个参数的导数，并在向起点回溯时重复利用先前的计算。
 
+<div align="center">
+
+![图 7.3](/figures/ch07/Train2BP3.png)
+
+</div>
+
 > **图 7.3** 反向传播前向传播。我们依次计算并存储每个中间变量，直到最终计算出损失。
 
 **前向传播：** 我们将损失的计算视为一系列计算步骤：
@@ -114,6 +132,12 @@ $$\frac{\partial \ell_i}{\partial h_3} = \frac{\partial f_3}{\partial h_3} \frac
 
 左边询问当 $h_3$ 改变时 $\ell_i$ 如何变化。右边告诉我们可以将其分解为 (i) 当 $h_3$ 改变时 $f_3$ 如何变化，以及 (ii) 当 $f_3$ 改变时 $\ell_i$ 如何变化。在原始方程中，$h_3$ 改变 $f_3$，$f_3$ 改变 $\ell_i$，这些导数代表了这条链的效应。注意这些导数中的第二个已经在前一步中计算过了，另一个是 $\beta_3 + \omega_3 \cdot h_3$ 关于 $h_3$ 的导数，即 $\omega_3$。
 
+<div align="center">
+
+![图 7.4](/figures/ch07/Train2BPIntuitions.png)
+
+</div>
+
 > **图 7.4** 反向传播的反向传播 #1。我们从函数末端反向计算损失关于中间量的导数 $\partial \ell_i / \partial f_k$ 和 $\partial \ell_i / \partial h_k$。每个导数由前一个导数乘以 $\partial f_k / \partial h_k$ 或 $\partial h_k / \partial f_{k-1}$ 形式的项得到。
 
 我们以这种方式继续，计算输出关于这些中间量的导数（图 7.4）：
@@ -139,6 +163,12 @@ $$\begin{aligned}
 
 $$\frac{\partial f_k}{\partial \beta_k} = 1 \qquad \text{和} \qquad \frac{\partial f_k}{\partial \omega_k} = h_k. \tag{7.15}$$
 
+<div align="center">
+
+![图 7.5](/figures/ch07/Train2BPIntuitions2.png)
+
+</div>
+
 > **图 7.5** 反向传播的反向传播 #2。最后，我们计算 $\partial \ell_i / \partial \beta_k$ 和 $\partial \ell_i / \partial \omega_k$。每个导数由 $\partial \ell_i / \partial f_k$ 乘以 $\partial f_k / \partial \beta_k$ 或 $\partial f_k / \partial \omega_k$ 得到。
 
 这与上一节的观察 1 一致；权重 $\omega_k$ 变化的效果正比于源变量 $h_k$ 的值（前向传播中已存储）。从 $f_0 = \beta_0 + \omega_0 \cdot x_i$ 得到的最后的导数是：
@@ -163,6 +193,12 @@ $$\begin{aligned}
 \mathbf{f}_3 &= \boldsymbol{\beta}_3 + \boldsymbol{\Omega}_3 \mathbf{h}_3 \\
 \ell_i &= \text{l}[\mathbf{f}_3, y_i].
 \end{aligned} \tag{7.17}$$
+
+<div align="center">
+
+![图 7.6](/figures/ch07/Train2ReLUDeriv.png)
+
+</div>
 
 > **图 7.6** 修正线性单元的导数。修正线性单元（橙色曲线）在输入小于零时返回零，否则返回输入本身。它的导数（青色曲线）在输入小于零时返回零（因为此处斜率为零），在输入大于零时返回一（因为此处斜率为一）。
 
@@ -321,6 +357,12 @@ $$\begin{aligned}
 假设前一层的预激活值 $f_j$ 的分布关于零对称，则其中一半会被 ReLU 函数截断，二阶矩 $\mathbb{E}[h_j^2]$ 将是 $f_j$ 方差 $\sigma_f^2$ 的一半：
 
 $$\sigma_{f_i'}^2 = \sigma_\Omega^2 \sum_{j=1}^{D_h} \frac{\sigma_f^2}{2} = \frac{1}{2} D_h \sigma_\Omega^2 \sigma_f^2. \tag{7.31}$$
+
+<div align="center">
+
+![图 7.7](/figures/ch07/Train2Exploding.png)
+
+</div>
 
 > **图 7.7** 权重初始化。考虑一个有 50 个隐藏层、每层 $D_h = 100$ 个隐藏单元的深度网络。网络有 100 维输入 $\mathbf{x}$、单一固定目标 $y = 0$，使用最小二乘损失函数。偏置向量 $\boldsymbol{\beta}_k$ 初始化为零，权重矩阵 $\boldsymbol{\Omega}_k$ 用均值为零、五种不同方差 $\sigma_\Omega^2 \in \{0.001, 0.01, 0.02, 0.1, 1.0\}$ 的正态分布初始化。a) 隐藏单元激活值的方差随网络层数变化。对于 He 初始化（$\sigma_\Omega^2 = 2/D_h = 0.02$），方差是稳定的。但对于更大的值，方差快速增加；对于更小的值，方差快速减小（注意纵轴为对数刻度）。b) 反向传播中梯度的方差（实线）延续了这一趋势；如果初始化时使用大于 0.02 的值，梯度幅度在反向传播过程中快速增加。如果使用更小的值，则幅度减小。这分别被称为梯度爆炸和梯度消失问题。
 

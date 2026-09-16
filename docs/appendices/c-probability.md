@@ -16,6 +16,12 @@ $$\iint Pr(x, y) \cdot dx dy = 1. \tag{C.1}$$
 
 这一思想可以扩展到两个以上的变量，因此 $x$、$y$ 和 $z$ 的联合密度写为 $Pr(x, y, z)$。有时，我们将多个随机变量存储在向量 $\mathbf{x}$ 中，并将其联合密度写为 $Pr(\mathbf{x})$。进一步扩展，我们可以将两个向量 $\mathbf{x}$ 和 $\mathbf{y}$ 中所有变量的联合密度写为 $Pr(\mathbf{x}, \mathbf{y})$。
 
+<div align="center">
+
+![图 C.1](/figures/appendix/AppJointMarg.png)
+
+</div>
+
 > **图 C.1** 联合分布和边缘分布。a) 联合分布 $Pr(x, y)$ 描述了变量 $x$ 和 $y$ 取不同值组合的倾向。这里，概率密度用颜色图表示，较亮的位置概率更大。b) 变量 $x$ 的边缘分布 $Pr(x)$ 可以通过对 $y$ 积分来恢复。c) 变量 $y$ 的边缘分布 $Pr(y)$ 可以通过对 $x$ 积分来恢复。
 
 ### C.1.2 边缘化
@@ -36,6 +42,12 @@ $$Pr(x|y) = \frac{Pr(x, y)}{Pr(y)}. \tag{C.3}$$
 类似地，
 
 $$Pr(y|x) = \frac{Pr(x, y)}{Pr(x)}. \tag{C.4}$$
+
+<div align="center">
+
+![图 C.2](/figures/appendix/AppJointCond.png)
+
+</div>
 
 > **图 C.2** 条件分布。a) 变量 $x$ 和 $y$ 的联合分布 $Pr(x, y)$。b) 在给定变量 $y$ 取值 3.0 条件下变量 $x$ 的条件概率 $Pr(x|y=3.0)$，通过取联合概率 $Pr(x, y=3.0)$ 的水平"切片"（面板 a 中的上方青色线），然后除以该切片的总面积 $Pr(y=3.0)$，使其形成积分为1的有效概率分布。c) 联合概率 $Pr(x, y=-1.0)$ 类似地使用 $y=-1.0$ 处的切片得到。
 
@@ -64,6 +76,12 @@ $$Pr(x|y) = \frac{Pr(y|x)Pr(x)}{Pr(y)}. \tag{C.6}$$
 $$Pr(x, y) = Pr(x|y)Pr(y) = Pr(x)Pr(y) \tag{C.7}$$
 
 （图 C.3）。
+
+<div align="center">
+
+![图 C.3](/figures/appendix/AppInd.png)
+
+</div>
 
 > **图 C.3** 独立性。a) 当两个变量 $x$ 和 $y$ 独立时，联合分布分解为边缘分布的乘积，即 $Pr(x, y) = Pr(x)Pr(y)$。独立性意味着知道一个变量的值不能告诉我们关于另一个变量的任何信息。b-c) 因此，所有条件分布 $Pr(x|y=\bullet)$ 都相同，且等于边缘分布 $Pr(x)$。
 
@@ -208,6 +226,12 @@ $$\text{Norm}_{\mathbf{x}}[\boldsymbol{\mu}, \boldsymbol{\Sigma}] = \frac{1}{(2\
 
 $$\boldsymbol{\Sigma}_{spher} = \begin{bmatrix} \sigma^2 & 0 \\ 0 & \sigma^2 \end{bmatrix} \quad \boldsymbol{\Sigma}_{diag} = \begin{bmatrix} \sigma_1^2 & 0 \\ 0 & \sigma_2^2 \end{bmatrix} \quad \boldsymbol{\Sigma}_{full} = \begin{bmatrix} \sigma_{11}^2 & \sigma_{12}^2 \\ \sigma_{21}^2 & \sigma_{22}^2 \end{bmatrix}. \tag{C.27}$$
 
+<div align="center">
+
+![图 C.4](/figures/appendix/AppMVarGauss.png)
+
+</div>
+
 > **图 C.4** 二元正态分布。a-b) 当协方差矩阵是单位矩阵的倍数时，等密度轮廓是圆，我们称之为球形协方差。c-d) 当协方差是任意对角矩阵时，等密度轮廓是与坐标轴对齐的椭圆，我们称之为对角协方差。e-f) 当协方差是任意对称正定矩阵时，等密度轮廓是一般椭圆，我们称之为完整协方差。
 
 在二维情况下（图 C.4），球形协方差产生圆形等密度轮廓，对角协方差产生与坐标轴对齐的椭圆等密度轮廓。完整协方差产生一般的椭圆等密度轮廓。当协方差是球形或对角的时，各个变量是独立的。
@@ -225,6 +249,12 @@ $$\text{Norm}_{\mathbf{x}}[\mathbf{a}, \mathbf{A}] \text{Norm}_{\mathbf{x}}[\mat
 当多变量正态分布 $\mathbf{x}$ 的均值是第二个变量 $\mathbf{y}$ 的线性函数 $\mathbf{Ay} + \mathbf{b}$ 时，这正比于 $\mathbf{y}$ 中的另一个正态分布，其中均值是 $\mathbf{x}$ 的线性函数：
 
 $$\text{Norm}_{\mathbf{x}}[\mathbf{Ay} + \mathbf{b}, \boldsymbol{\Sigma}] \propto \text{Norm}_{\mathbf{y}}[(\mathbf{A}^T\boldsymbol{\Sigma}^{-1}\mathbf{A})^{-1}\mathbf{A}^T\boldsymbol{\Sigma}^{-1}(\mathbf{x} - \mathbf{b}), (\mathbf{A}^T\boldsymbol{\Sigma}^{-1}\mathbf{A})^{-1}]. \tag{C.30}$$
+
+<div align="center">
+
+![图 C.5](/figures/appendix/AppChangeVar.png)
+
+</div>
 
 > **图 C.5** 变量替换。a) 条件分布 $Pr(x|y)$ 是一个方差恒定、均值线性依赖于 $y$ 的正态分布。青色分布展示了 $y = -0.2$ 时的一个例子。b) 这正比于条件概率 $Pr(y|x)$，它是一个方差恒定、均值线性依赖于 $x$ 的正态分布。青色分布展示了 $x = -3$ 时的一个例子。
 
@@ -259,6 +289,12 @@ $$Pr(x, y, z) = Pr(x)Pr(y|x)Pr(z|y). \tag{C.32}$$
 $$D_{KL}[p(x)||q(x)] = \int p(x) \log\left[\frac{p(x)}{q(x)}\right] dx. \tag{C.33}$$
 
 这个距离始终大于或等于零，这可以通过注意到 $-\log[y] \geq 1 - y$（图 C.6）来轻松证明。
+
+<div align="center">
+
+![图 C.6](/figures/appendix/AppInequality.png)
+
+</div>
 
 > **图 C.6** 负对数的下界。函数 $1 - y$ 总是小于函数 $-\log[y]$。这个关系用于证明 Kullback-Leibler 散度始终大于或等于零。
 
