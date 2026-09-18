@@ -4,6 +4,8 @@
 
 [![License](https://img.shields.io/badge/License-CC--BY--NC--ND-orange.svg)](LICENSE)
 
+📖 **在线阅读**：[Vercel](https://understanding-deep-learning-zh.vercel.app) | [GitBook](https://bruceinpeking.gitbook.io/understanding-deep-learning-zh)
+
 ---
 
 ## 📚 项目简介
