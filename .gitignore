@@ -38,7 +38,6 @@ full_translation.log
 
 # Node.js
 node_modules/
-package-lock.json
 
 # VitePress
 docs/.vitepress/cache/
@@ -59,3 +58,4 @@ temp/
 
 # Output from tools
 /private/
+.vercel
