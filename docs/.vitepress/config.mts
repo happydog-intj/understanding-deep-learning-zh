@@ -5,6 +5,7 @@ export default defineConfig({
   title: '理解深度学习',
   description: 'Understanding Deep Learning 中文翻译',
   lang: 'zh-CN',
+  base: process.env.GITHUB_PAGES === 'true' ? '/understanding-deep-learning-zh/' : '/',
 
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }],
